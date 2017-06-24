@@ -1,1 +1,1 @@
-# ebib_demo
+# Sketch-based Implicit Blending C++ Demo
