@@ -89,7 +89,7 @@ float bSplineBasis(float U[], int o, int i, float u, int num_samples)
 	float n = 0;
 	if (o == 1)
 	{
-		if (u >= U(i) && u < U(i + 1))
+		if (u >= U[i] && u < U[i + 1])
 			n = 1;
 		else
 			n = 0;
@@ -99,10 +99,10 @@ float bSplineBasis(float U[], int o, int i, float u, int num_samples)
 		float n1 = bSplineBasis(U, o - 1, i, u, num_samples);
 		float n2 = bSplineBasis(U, o - 1, i + 1, u, num_samples);
 
-		float nume1 = n1 * (u - U(i));
-		float deno1 = U(i + o - 1) - U(i);
-		float nume2 = n2 * (U(i + o) - u);
-		float deno2 = U(i + o) - U(i + 1);
+		float nume1 = n1 * (u - U[i]);
+		float deno1 = U[i + o - 1] - U[i];
+		float nume2 = n2 * (U[i + o] - u);
+		float deno2 = U[i + o] - U[i + 1];
 
 		if (deno1 == 0)
 		{
@@ -125,10 +125,11 @@ float* bspline(int k, float P[5][3]) {
 	float x[100] = {};
 	int num_samples = 100;
 
-	float U[noOfPoints + k] = {};
+	float *U = new float[noOfPoints + k];
 
 	for (int i = 0; i < noOfPoints + k - 1; i++)
 	{
+		U[i] = 0;
 		if (i < k)
 		{
 			U[i] = 0;
@@ -149,7 +150,17 @@ float* bspline(int k, float P[5][3]) {
 
 	}
 
-	float Q[num_samples][3] = {{}};
+	float** Q = new float*[num_samples];
+	
+	for (int i = 0; i < num_samples; ++i) {
+		Q[i] = new float[3];
+	}
+
+	for (int i = 1; i < num_samples; i++) {
+		Q[i][0] = 0;
+		Q[i][1] = 0;
+		Q[i][2] = 0;
+	}
 
 	for(int i = 0; i<noOfPoints;i++) {
 		for(int a = 1; a<num_samples;a++) {
@@ -161,7 +172,7 @@ float* bspline(int k, float P[5][3]) {
 		}
 	}
 
-	return Q;
+	return &Q[0][0];
 }
 
 
