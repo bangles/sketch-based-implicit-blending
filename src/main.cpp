@@ -4,10 +4,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <GLUT/glut.h>
+#include <GL/glut.h>
 
 #include "camera.hpp"
-#include "shader.hpp"
 
 using namespace glm;
 using namespace std;
@@ -178,7 +177,15 @@ float* bspline(int k, float P[5][3]) {
 
 void renderTemplate()
 {
+	float P[5][3] = { {} };
 
+	for (int i = 0; i < 5; i++) {
+		P[i][0] = 10;
+		P[i][1] = i * 2;
+		P[i][2] = 0;
+	}
+
+	float * bspline1 = bspline(3, P);
 }
 
 void render(void)
