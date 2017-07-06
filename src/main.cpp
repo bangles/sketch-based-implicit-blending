@@ -1,109 +1,76 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <fstream>
+// third-party libraries
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-//#include <glm/glm.hpp>
-//#include <GLUT/glut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include <vector>
+// standard C++ libraries
+#include <cassert>
+#include <iostream>
+#include <stdexcept>
+#include <cmath>
 
-#include "Camera.hpp"
-#include "shader.hpp"
+// tdogl classes
+#include "Program.h"
+#include "Camera.h"
 
-//using namespace glm;
-using namespace std;
-GLFWwindow* window;
-Camera *cam;
+// constants
+const glm::vec2 SCREEN_SIZE(800, 600);
 
-GLint windowWidth = 800;              // Width of our window
-GLint windowHeight = 600;              // Heightof our window
-
-GLint midWindowX = windowWidth / 2; // Middle of the window horizontally
-GLint midWindowY = windowHeight / 2; // Middle of the window vertically
-
-GLfloat fieldOfView = 45.0f;            // Define our field of view (i.e. how quickly foreshortening occurs)
-GLfloat near = 2.0f;             // The near (Z Axis) point of our viewing frustum (default 2.0f)
-GLfloat far = 1500.0f;          // The far  (Z Axis) point of our viewing frustum (default 1500.0f)
-
+// globals
+GLFWwindow* gWindow = NULL;
+double gScrollY = 0.0;
+tdogl::Program* gProgram = NULL;
+tdogl::Camera gCamera;
+GLuint gVAO, gVBO[4];
 
 static const int NUM_CONTROL_POINTS = 5;
 static const int NUM_SAMPLES = 100;
-
-void DrawNet(GLfloat size, GLint LinesX, GLint LinesZ)
-{
-	glBegin(GL_LINES);
-	for (int xc = 0; xc < LinesX; xc++)
-	{
-		glVertex3f(-size / 2.0 + xc / (GLfloat) (LinesX - 1) * size, 0.0, size / 2.0);
-		glVertex3f(-size / 2.0 + xc / (GLfloat) (LinesX - 1) * size, 0.0, size / -2.0);
-	}
-	for (int zc = 0; zc < LinesX; zc++)
-	{
-		glVertex3f(size / 2.0, 0.0, -size / 2.0 + zc / (GLfloat) (LinesZ - 1) * size);
-		glVertex3f(size / -2.0, 0.0, -size / 2.0 + zc / (GLfloat) (LinesZ - 1) * size);
-	}
-	glEnd();
-}
+std::vector<GLuint> indices((NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 6);
 
 
-void renderGrid()
-{
-	GLfloat size = 2.0;
-	GLint LinesX = 30;
-	GLint LinesZ = 30;
-
-	GLfloat halfsize = size / 2.0;
-	glColor3f(1.0, 1.0, 1.0);
-
-    glPushMatrix();
-    glTranslatef(0.0, 0.0, 0.0);
-
+// loads the vertex shader and fragment shader, and links them to make the global gProgram
+static void LoadShaders() {
+    std::vector<tdogl::Shader> shaders;
     
-	DrawNet(size, LinesX, LinesZ);
-	glPopMatrix();
-
-}
-
-void handleMouseMove(GLFWwindow *window, double mouseX, double mouseY)
-{
-    cam->handleMouseMove(mouseX, mouseY);
+    shaders.push_back(tdogl::Shader::shaderFromFile("../../resources/vs.glsl", GL_VERTEX_SHADER));
+    shaders.push_back(tdogl::Shader::shaderFromFile("../../resources/fs.glsl", GL_FRAGMENT_SHADER));
+    gProgram = new tdogl::Program(shaders);
 }
 
 float bSplineBasis(float U[], int o, int i, float u, int num_samples)
 {
-	float n = 0;
-	if (o == 1)
-	{
-		if (u >= U[i] && u < U[i + 1])
-			n = 1;
-		else
-			n = 0;
-	}
-	else
-	{
-		float n1 = bSplineBasis(U, o - 1, i, u, num_samples);
-		float n2 = bSplineBasis(U, o - 1, i + 1, u, num_samples);
-
-		float nume1 = n1 * (u - U[i]);
-		float deno1 = U[i + o - 1] - U[i];
-		float nume2 = n2 * (U[i + o] - u);
-		float deno2 = U[i + o] - U[i + 1];
-
-		if (deno1 == 0)
-		{
-			n = (nume2 / deno2);
-		}
-		else
-		{
-			if (deno2 == 0)
-				n = (nume1 / deno1);
-			else
-				n = (nume1 / deno1) + (nume2 / deno2);
-		}
-	}
-	return n;
+    float n = 0;
+    if (o == 1)
+    {
+        if (u >= U[i] && u < U[i + 1])
+            n = 1;
+        else
+            n = 0;
+    }
+    else
+    {
+        float n1 = bSplineBasis(U, o - 1, i, u, num_samples);
+        float n2 = bSplineBasis(U, o - 1, i + 1, u, num_samples);
+        
+        float nume1 = n1 * (u - U[i]);
+        float deno1 = U[i + o - 1] - U[i];
+        float nume2 = n2 * (U[i + o] - u);
+        float deno2 = U[i + o] - U[i + 1];
+        
+        if (deno1 == 0)
+        {
+            n = (nume2 / deno2);
+        }
+        else
+        {
+            if (deno2 == 0)
+                n = (nume1 / deno1);
+            else
+                n = (nume1 / deno1) + (nume2 / deno2);
+        }
+    }
+    return n;
 }
 
 std::vector<GLfloat> bSplineSurface(int k, float P[NUM_CONTROL_POINTS][NUM_CONTROL_POINTS][3], int noOfPoints, int num_samples)
@@ -164,115 +131,18 @@ std::vector<GLfloat> bSplineSurface(int k, float P[NUM_CONTROL_POINTS][NUM_CONTR
     return vertices;
 }
 
-void initGL(){
-    // start GL context and O/S window using the GLFW helper library
-    if (!glfwInit()) {
-        fprintf(stderr, "ERROR: could not start GLFW3\n");
-        return 1;
-    }
-    
-    // uncomment these lines if on Apple OS X
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-    window = glfwCreateWindow(1024, 768, "ebib_demo", NULL, NULL);
-    if (!window) {
-        fprintf(stderr, "ERROR: could not open window with GLFW3\n");
-        glfwTerminate();
-        return 1;
-    }
-    glfwMakeContextCurrent(window);
-    
-    // start GLEW extension handler
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        getchar();
-        glfwTerminate();
-        return -1;
-    }
-    
-    // get version info
-    const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-    const GLubyte* version = glGetString(GL_VERSION); // version as a string
-    printf("Renderer: %s\n", renderer);
-    printf("OpenGL version supported %s\n", version);
-    
-    // Ensure we can capture the escape key being pressed below
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-}
-
-GLuint VertexArrayID;
-GLuint vertexbuffer;
-GLuint elementBuffer;
-GLuint programID;
-std::vector<GLuint> indices((NUM_SAMPLES) * (NUM_SAMPLES) * 6);
-
-void render()
-{
-    // Clear the screen
-    glClear(GL_COLOR_BUFFER_BIT);
-    
-    // Use our shader
-    glUseProgram(programID);
-    
-    // 1rst attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glVertexAttribPointer(
-                          0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                          3,                  // size
-                          GL_FLOAT,           // type
-                          GL_FALSE,           // normalized?
-                          0,                  // stride
-                          (void*)0            // array buffer offset
-                          );
-    
-    // Draw the triangle !
-    //glDrawArrays(GL_TRIANGLES, 0, splineVertices.size()/3); // 3 indices starting at 0 -> 1 triangle
-    glDrawElements(GL_TRIANGLES, indices.size() * 3, GL_UNSIGNED_SHORT, (void*)0);
-    
-    glDisableVertexAttribArray(0);
-    
-    // Swap buffers
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-    
-}
-
 void initTemplate(){
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
+    glGenVertexArrays(1, &gVAO);
+    glGenBuffers(4, gVBO);
     
-    float P[NUM_CONTROL_POINTS][NUM_CONTROL_POINTS][3] = {{{}}};
     
-    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
-    {
-        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-        {
-            P[i][j][0] = i * 1.0f / NUM_CONTROL_POINTS;
-            P[i][j][1] = j * 1.0f / NUM_CONTROL_POINTS;
-            P[i][j][2] = 0.0f;
-        }
-    }
-    
-    std::vector<GLfloat> splineVertices = bSplineSurface(3, P, NUM_CONTROL_POINTS, NUM_SAMPLES);
-    
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, splineVertices.size() * sizeof(GLfloat), &splineVertices[0], GL_STATIC_DRAW);
     
     int count = 0;
-    for (int a = 0; a < NUM_SAMPLES; a++)
+    for (int a = 0; a < NUM_SAMPLES-1; a++)
     {
-        for (int b = 0; b < NUM_SAMPLES; b++)
+        for (int b = 0; b < NUM_SAMPLES-1; b++)
         {
-            indices[count++] = a*NUM_SAMPLES + b;				//0
+            indices[count++] = a * NUM_SAMPLES + b;				//0
             indices[count++] = (a + 1)*NUM_SAMPLES + b;			//100
             indices[count++] = (a + 1)*NUM_SAMPLES + b + 1;		//101
             
@@ -282,38 +152,238 @@ void initTemplate(){
         }
     }
     
+    float P[NUM_CONTROL_POINTS][NUM_CONTROL_POINTS][3] = {{{}}};
     
-    glGenBuffers(1, &elementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
+    {
+        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
+        {
+            P[i][j][0] = i * 1.0 / (NUM_CONTROL_POINTS-1);
+            P[i][j][1] = j * 1.0 / (NUM_CONTROL_POINTS-1);
+            P[i][j][2] = 0.0f;
+        }
+    }
+    
+    std::vector<GLfloat> splineVertices1 = bSplineSurface(3, P, NUM_CONTROL_POINTS, NUM_SAMPLES);
+    
+    glBindVertexArray(gVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO[0]);
+    glBufferData(GL_ARRAY_BUFFER, splineVertices1.size() * sizeof(GLfloat), &splineVertices1[0], GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+    
+    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
+    {
+        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
+        {
+            P[i][j][0] = i * 1.0/ (NUM_CONTROL_POINTS-1);
+            P[i][j][1] = 0.97f;
+            P[i][j][2] = j * 1.0 / (NUM_CONTROL_POINTS-1);
+        }
+    }
+    
+    std::vector<GLfloat> splineVertices2 = bSplineSurface(3, P, NUM_CONTROL_POINTS, NUM_SAMPLES);
+    
+    //    glBindVertexArray(gVAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO[2]);
+    glBufferData(GL_ARRAY_BUFFER, splineVertices2.size() * sizeof(GLfloat), &splineVertices2[0], GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[3]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
     
 }
 
-void cleanUp() {
-    glDeleteBuffers(1, &vertexbuffer);
-    glDeleteBuffers(1, &elementBuffer);
-    glDeleteVertexArrays(1, &VertexArrayID);
-    glDeleteProgram(programID);
+
+// draws a single frame
+static void Render() {
+    glClearColor(0, 0, 0, 1); // black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // bind the program (the shaders)
+    gProgram->use();
+    
+    gProgram->setUniform("camera", gCamera.matrix());
+    gProgram->setUniform("model",glm::mat4(1.0f));
+    
+    glEnableVertexAttribArray(0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
+    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 0,(void*)0);
+    glDrawElements(GL_TRIANGLES, indices.size() * 3, GL_UNSIGNED_SHORT, (void*)0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO[2]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[3]);
+    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 0,(void*)0);
+    glDrawElements(GL_TRIANGLES, indices.size() * 3, GL_UNSIGNED_SHORT, (void*)0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray(0);
+    
+    gProgram->stopUsing();
+    
+    // swap the display buffers (displays what was just drawn)
+    glfwSwapBuffers(gWindow);
 }
 
-int main(int argc, char **argv)
-{
-    initGL();
+
+// update the scene based on the time elapsed since last update
+void Update(float secondsElapsed) {
+    //rotate the cube
+    //    const GLfloat degreesPerSecond = 180.0f;
+    //    gDegreesRotated += secondsElapsed * degreesPerSecond;
+    //    while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
+    
+    //move position of camera based on WASD keys, and XZ keys for up and down
+    const float moveSpeed = 2.0; //units per second
+    if(glfwGetKey(gWindow, 'S')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+    } else if(glfwGetKey(gWindow, 'W')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+    }
+    if(glfwGetKey(gWindow, 'A')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+    } else if(glfwGetKey(gWindow, 'D')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+    }
+    if(glfwGetKey(gWindow, 'Z')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+    } else if(glfwGetKey(gWindow, 'X')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+    }
+    
+    //rotate camera based on mouse movement
+    const float mouseSensitivity = 0.1f;
+    double mouseX, mouseY;
+    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+    gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+    glfwSetCursorPos(gWindow, 0, 0); //reset the mouse, so it doesn't go out of the window
+    
+    //increase or decrease field of view based on mouse wheel
+    const float zoomSensitivity = -0.2f;
+    float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+    if(fieldOfView < 5.0f) fieldOfView = 5.0f;
+    if(fieldOfView > 130.0f) fieldOfView = 130.0f;
+    gCamera.setFieldOfView(fieldOfView);
+    gScrollY = 0;
+}
+
+// records how far the y axis has been scrolled
+void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
+    gScrollY += deltaY;
+}
+
+void OnError(int errorCode, const char* msg) {
+    throw std::runtime_error(msg);
+}
+
+void cleanUp() {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+// the program starts here
+void AppMain() {
+    // initialise GLFW
+    glfwSetErrorCallback(OnError);
+    if(!glfwInit())
+        throw std::runtime_error("glfwInit failed");
+    
+    // open a window with GLFW
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "ebib_demo", NULL, NULL);
+    if(!gWindow)
+        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
+    
+    // GLFW settings
+    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(gWindow, 0, 0);
+    glfwSetScrollCallback(gWindow, OnScroll);
+    glfwMakeContextCurrent(gWindow);
+    
+    // initialise GLEW
+    glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
+    if(glewInit() != GLEW_OK)
+        throw std::runtime_error("glewInit failed");
+    
+    // GLEW throws some errors, so discard all the errors so far
+    while(glGetError() != GL_NO_ERROR) {}
+    
+    // print out some info about the graphics drivers
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    
+    // make sure OpenGL version 3.2 API is available
+    if(!GLEW_VERSION_3_2)
+        throw std::runtime_error("OpenGL 3.2 API is not available.");
+    
+    // OpenGL settings
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // load vertex and fragment shaders into opengl
+    LoadShaders();
+    
+    // load the texture
+    //    LoadTexture();
+    
+    // create buffer and fill it with the points of the triangle
+    //    LoadCube();
+    
     initTemplate();
     
-    // Create and compile our GLSL program from the shaders
-    programID = LoadShaders("../../shaders/vs.glsl", "../../shaders/fs.glsl");
+    // setup gCamera
+    gCamera.setPosition(glm::vec3(0,0,4));
+    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     
-    do {
-       
-        render();
+    // run while the window is open
+    double lastTime = glfwGetTime();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    while(!glfwWindowShouldClose(gWindow)){
+        // process pending events
+        glfwPollEvents();
         
-        } // Check if the ESC key was pressed or the window was closed
-    while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-           glfwWindowShouldClose(window) == 0);
+        // update the scene based on the time elapsed since last update
+        double thisTime = glfwGetTime();
+        Update((float)(thisTime - lastTime));
+        lastTime = thisTime;
+        
+        // draw one frame
+        Render();
+        
+        // check for errors
+        GLenum error = glGetError();
+        if(error != GL_NO_ERROR)
+            std::cerr << "OpenGL Error " << error << std::endl;
+        
+        //exit program if escape key is pressed
+        if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+            glfwSetWindowShouldClose(gWindow, GL_TRUE);
+    }
     
     cleanUp();
+    
+    // clean up and exit
     glfwTerminate();
-    return 0;
 }
 
+
+int main(int argc, char *argv[]) {
+    try {
+        AppMain();
+    } catch (const std::exception& e){
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    return EXIT_SUCCESS;
+}

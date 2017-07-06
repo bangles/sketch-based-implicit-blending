@@ -26,7 +26,8 @@ set(ALL_LIBS
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/inc")
 add_subdirectory("${CMAKE_SOURCE_DIR}/src")
-add_subdirectory("${CMAKE_SOURCE_DIR}/shaders")
+add_subdirectory("${CMAKE_SOURCE_DIR}/resources")
+
 
 add_executable(${CMAKE_PROJECT_NAME} ${PROJECT_INCLUDE_LIST} ${PROJECT_SOURCE_LIST} ${PROJECT_SHADER_LIST})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${ALL_LIBS})
