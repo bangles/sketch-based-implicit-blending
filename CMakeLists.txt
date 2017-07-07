@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 project(ebib_demo)
 
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DPROG_DEBUG")
@@ -19,7 +18,6 @@ include_directories(
 		
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
-	${GLUT_LIBRARY}
 	glfw
 	GLEW
 )
