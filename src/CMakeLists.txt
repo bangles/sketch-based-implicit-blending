@@ -4,4 +4,9 @@ set(PROJECT_SOURCE_LIST
 		"${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Grid.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Scene.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/BSplineSurface.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Template.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/UserPoints.cpp"
         PARENT_SCOPE)
