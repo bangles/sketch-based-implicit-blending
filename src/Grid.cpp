@@ -14,15 +14,33 @@ Grid::Grid(int numIndices, tdogl::Program& gProgram){
     this->gProgram = &gProgram;
     glGenBuffers(1, &gVBO);
     
-    std::vector<glm::vec3> vertices(numIndices);
+    vertices = std::vector<glm::vec3>(numIndices);
     
-    int n = (int)numIndices / 4;
+    const int VERTEX_NUMBER = 12;
+    
+    int n = (int)numIndices / VERTEX_NUMBER;
     for (int i = 0; i < n; ++i)
     {
-        vertices[4 * i + 0] = { -12.0f + i, 0.0f, -12.0f };
-        vertices[4 * i + 1] = { -12.0f + i, 0.0f,  12.0f };
-        vertices[4 * i + 2] = { -12.0f, 0.0f, -12.0f + i };
-        vertices[4 * i + 3] = { 12.0f, 0.0f, -12.0f + i };
+        //x-z plane
+        vertices[VERTEX_NUMBER * i + 0] = { i * 0.1f, 0.0f, 0.0f };
+        vertices[VERTEX_NUMBER * i + 1] = { i * 0.1f, 0.0f,  1.0f };
+        
+        vertices[VERTEX_NUMBER * i + 2] = { 0.0f, 0.0f, i * 0.1f };
+        vertices[VERTEX_NUMBER * i + 3] = { 1.0f, 0.0f, i * 0.1f };
+        
+        //x-y plane
+        vertices[VERTEX_NUMBER * i + 4] = { i * 0.1f, 0.0f, 0.0f };
+        vertices[VERTEX_NUMBER * i + 5] = { i * 0.1f, 1.0f,  0.0f };
+        
+        vertices[VERTEX_NUMBER * i + 6] = { 0.0f, i * 0.1f, 0.0f };
+        vertices[VERTEX_NUMBER * i + 7] = { 1.0f, i * 0.1f, 0.0f };
+        
+        //y-z plane
+        vertices[VERTEX_NUMBER * i + 8] = { 0.0f, i * 0.1f, 0.0f };
+        vertices[VERTEX_NUMBER * i + 9] = { 0.0f, i * 0.1f, 1.0f };
+        
+        vertices[VERTEX_NUMBER * i + 10] = { 0.0f, 0.0f, i * 0.1f };
+        vertices[VERTEX_NUMBER * i + 11] = { 0.0f, 1.0f, i * 0.1f };
     }
     
     //glBindVertexArray(gVAO);
@@ -36,5 +54,5 @@ void Grid::renderGrid(){
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glDrawArrays(GL_LINES, 0, 100);
+    glDrawArrays(GL_LINES, 0, vertices.size());
 }

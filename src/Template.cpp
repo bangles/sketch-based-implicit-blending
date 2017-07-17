@@ -35,7 +35,7 @@ Template::Template(tdogl::Program& gProgram){
     
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            points1[j + (NUM_CONTROL_POINTS * i)] = { i * 1.0 / (NUM_CONTROL_POINTS - 1),j * 1.0 / (NUM_CONTROL_POINTS - 1), 0.0f };
+            points1[j + (NUM_CONTROL_POINTS * i)] = { i * 1.0 / (NUM_CONTROL_POINTS - 1), j * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f };
     
     std::vector<glm::vec3> splineVertices1 = surface.evaluateSurface(3, points1, NUM_CONTROL_POINTS, NUM_SAMPLES);
     
@@ -49,7 +49,7 @@ Template::Template(tdogl::Program& gProgram){
     std::vector<glm::vec3> points2(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            points2[j + (NUM_CONTROL_POINTS * i)] = { i * 1.0 / (NUM_CONTROL_POINTS - 1),1.0f,j * 1.0 / (NUM_CONTROL_POINTS - 1)};
+            points2[j + (NUM_CONTROL_POINTS * i)] = { i * 1.0 / (NUM_CONTROL_POINTS - 1),0.5f,0.5f + j * 0.5f / (NUM_CONTROL_POINTS - 1)};
     
     std::vector<glm::vec3> splineVertices2 = surface.evaluateSurface(3, points2, NUM_CONTROL_POINTS,NUM_SAMPLES);
     

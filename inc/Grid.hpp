@@ -20,6 +20,7 @@ namespace ebib {
     class Grid {
     private:
         GLuint gVBO;
+        std::vector<glm::vec3> vertices;
         tdogl::Program* gProgram = NULL;
         
     public:

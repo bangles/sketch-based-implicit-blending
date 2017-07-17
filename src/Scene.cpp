@@ -17,7 +17,7 @@ Scene::Scene(GLFWwindow& gWindow){
     gCamera.setPosition(glm::vec3(0, 0.5, 3));
     gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     this->gWindow = &gWindow;
-    grid = new Grid(100, *gProgram);
+    grid = new Grid(3 * 44, *gProgram);
     gTemplate = new Template(*gProgram);
     userPoints = new UserPoints(*gProgram);
     glGenVertexArrays(1, &gVAO);
