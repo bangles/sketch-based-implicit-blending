@@ -9,9 +9,9 @@
 #ifndef Template_hpp
 #define Template_hpp
 
-#include<vector>
+//#include<vector>
 #include <GL/glew.h>
-#include <glm/glm.hpp>
+//#include <glm/glm.hpp>
 
 #include "Program.h"
 #include "BSplineSurface.hpp"
@@ -24,14 +24,16 @@ namespace ebib {
     private:
         GLuint gVBO[6];
         tdogl::Program* gProgram = NULL;
-        std::vector<GLuint> indices;
         BSplineSurface surface;
         void renderControlPoints();
         
     public:
         Template(tdogl::Program& gProgram);
         ~Template();
-        void initPoints(std::vector<glm::vec3> points1, std::vector<glm::vec3> points2);
+        
+        Patch mPatch1;
+        Patch mPatch2;
+        void initPoints(MatrixXf* points1, MatrixXf* points2);
         void render();
         
     };

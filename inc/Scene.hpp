@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Template.hpp"
 #include "UserPoints.hpp"
+#include "Processor.hpp"
 
 #include <string>
 #include <stdio.h>
@@ -29,6 +30,7 @@ namespace ebib{
         GLFWwindow* gWindow = NULL;
         tdogl::Program* gProgram = NULL;
         tdogl::Camera gCamera;
+        Processor* _processor;
         Template* gTemplate = NULL;
         Grid* grid = NULL;
         UserPoints* userPoints = NULL;
@@ -38,9 +40,11 @@ namespace ebib{
         ~Scene();
         static const glm::vec2 SCREEN_SIZE;
         void render();
+        void process();
         void update(float deltaTime);
         void onScroll(double deltaY);
         void cleanUp();
+        void drawTestPoints(MatrixXf points);
     };
 }
 

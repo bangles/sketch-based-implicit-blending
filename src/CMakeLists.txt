@@ -9,4 +9,5 @@ set(PROJECT_SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/BSplineSurface.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Template.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/UserPoints.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Processor.cpp"
         PARENT_SCOPE)

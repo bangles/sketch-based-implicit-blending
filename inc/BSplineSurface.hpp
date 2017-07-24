@@ -9,12 +9,21 @@
 #ifndef BSplineSurface_hpp
 #define BSplineSurface_hpp
 
-#include <glm/glm.hpp>
-#include <vector>
+#include <Eigen/Dense>
+#include <GL/glew.h>
 
 
 namespace ebib {
+    using namespace Eigen;
+    
     static const int NUM_SAMPLES = 100;
+    
+    
+    struct Patch{
+        MatrixXf vertices;
+        MatrixXf weights;
+        MatrixXi triangles;
+    };
     
     class BSplineSurface {
     public:
@@ -23,7 +32,7 @@ namespace ebib {
         ~BSplineSurface();
     
         float bSplineBasis(float U[], int o, int i, float u, int num_samples, int max_value);
-        std::vector<glm::vec3> evaluateSurface(int k, std::vector<glm::vec3> points, int noOfPoints, int num_samples);
+        Patch evaluateSurface(int k, MatrixXf points, int noOfPoints, int num_samples);
         
         private:
         

@@ -1,9 +1,6 @@
 #include "BSplineSurface.hpp"
 
-#include <stdexcept>
-
 using namespace ebib;
-
 
 BSplineSurface::BSplineSurface(){
     
@@ -51,7 +48,7 @@ float BSplineSurface::bSplineBasis(float U[], int o, int i, float u, int num_sam
 }
 
 
-std::vector<glm::vec3> BSplineSurface::evaluateSurface(int k, std::vector<glm::vec3> points, int noOfPoints, int num_samples) {
+Patch BSplineSurface::evaluateSurface(int k, MatrixXf points, int noOfPoints, int num_samples) {
     
     float x[NUM_SAMPLES] = {};
     
@@ -81,24 +78,34 @@ std::vector<glm::vec3> BSplineSurface::evaluateSurface(int k, std::vector<glm::v
         
     }
     
-    std::vector<glm::vec3> vertices(num_samples * num_samples);
+    MatrixXf vertices(3,num_samples * num_samples);
+    vertices.setZero();
+    MatrixXf weigths(noOfPoints * noOfPoints,num_samples * num_samples);
     for (int a = 0; a < num_samples; a++)
     {
         for (int b = 0; b < num_samples; b++)
         {
+            VectorXf weight(noOfPoints * noOfPoints);
             for (int i = 0; i < noOfPoints; i++)
             {
-                glm::vec3 p2;
+                Vector3f p2(0,0,0);
+                float basis_2 = bSplineBasis(U, k, i, x[a], num_samples, max_value);
                 for (int j = 0; j < noOfPoints; j++)
                 {
                     float basis_1 = bSplineBasis(U, k, j, x[b], num_samples, max_value);
-                    p2 += basis_1 * points[noOfPoints*i + j];
+                    p2 += basis_1 * points.col(noOfPoints*i + j);
+                    weight(j * noOfPoints + i) = basis_1 * basis_2;
                 }
-                float basis_2 = bSplineBasis(U, k, i, x[a], num_samples, max_value);
-                vertices[(b + num_samples * a)] += basis_2 * p2;
+                
+                vertices.col(b + num_samples * a) += basis_2 * p2;
             }
+            weigths.col(b + num_samples * a) = weight;
         }
     }
-    return vertices;
+    Patch patch;
+    patch.vertices = vertices;
+    patch.weights = weigths;
+    
+    return patch;
 }
 

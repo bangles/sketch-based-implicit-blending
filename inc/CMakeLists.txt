@@ -8,4 +8,6 @@ set(PROJECT_INCLUDE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/BSplineSurface.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Template.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/UserPoints.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Processor.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/nnsearch.h"
         PARENT_SCOPE)

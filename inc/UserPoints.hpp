@@ -11,14 +11,16 @@
 
 #define PI 3.14159265
 
-#include<vector>
-//#include <GL/glew.h>
+
+#include <Eigen/Dense>
 //#include <glm/glm.hpp>
 
 #include "Program.h"
 
 namespace ebib {
-    static const int NUM_OF_USER_POINTS = 30;
+    using namespace Eigen;
+    
+    static const int NUM_OF_USER_POINTS = 10;
     
     class UserPoints {
     private:
@@ -28,6 +30,7 @@ namespace ebib {
     public:
         UserPoints(tdogl::Program& gProgram);
         ~UserPoints();
+        MatrixXf mUserPoints;
         void render();
     };
     

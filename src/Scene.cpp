@@ -7,6 +7,9 @@
 //
 
 #include "Scene.hpp"
+#include <iostream>
+
+#define LOG(x) std::cout << x << std::endl
 
 using namespace ebib;
 
@@ -20,6 +23,7 @@ Scene::Scene(GLFWwindow& gWindow){
     grid = new Grid(3 * 44, *gProgram);
     gTemplate = new Template(*gProgram);
     userPoints = new UserPoints(*gProgram);
+    _processor = new Processor(gTemplate->mPatch1);
     glGenVertexArrays(1, &gVAO);
     glBindVertexArray(gVAO);
 }
@@ -52,6 +56,10 @@ void Scene::render(){
 
 }
 
+void Scene::process(){
+    drawTestPoints(_processor->process(userPoints->mUserPoints));
+}
+
 void Scene::update(float deltaTime) {
     
     //move position of camera based on WASD keys, and XZ keys for up and down
@@ -73,6 +81,9 @@ void Scene::update(float deltaTime) {
     }
     else if (glfwGetKey(gWindow, 'X')) {
         gCamera.offsetPosition(deltaTime * moveSpeed * glm::vec3(0, 1, 0));
+    }
+    else if (glfwGetKey(gWindow, 'P')) {
+        process();
     }
     
     //rotate camera based on mouse movement
@@ -99,5 +110,25 @@ void Scene::cleanUp() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(0);
+}
+
+void Scene::drawTestPoints(MatrixXf points) {
+    gProgram->use();
+    gProgram->setUniform("camera", gCamera.matrix());
+    gProgram->setUniform("model", glm::mat4(1.0f));
+    
+    GLuint gVBO;
+    glGenBuffers(1, &gVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(GLfloat), points.data(), GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(0);
+    gProgram->setUniform("myColor", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glDrawArrays(GL_POINTS, 0, NUM_OF_USER_POINTS);
+    
+    gProgram->stopUsing();
+    glfwSwapBuffers(gWindow);
 }
 

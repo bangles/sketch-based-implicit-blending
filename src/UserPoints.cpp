@@ -9,25 +9,22 @@
 #include "UserPoints.hpp"
 
 using namespace ebib;
+using namespace Eigen;
 
 UserPoints::UserPoints(tdogl::Program& gProgram){
     this->gProgram = &gProgram;
+    mUserPoints = MatrixXf(3, NUM_OF_USER_POINTS);
     glGenBuffers(1, &gVBO);
     
-    std::vector<glm::vec3> userPoints(NUM_OF_USER_POINTS);
     float RADIUS = 0.3f;
     
     for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
-        double angle_rad = i * 360.0/NUM_OF_USER_POINTS * PI/180;
-        
-        userPoints[i] = {0.5 + RADIUS * glm::cos(angle_rad),
-            0.5 + RADIUS * glm::sin(angle_rad),
-            1.0f};
-        
+        double angle_rad = i * -180.0/NUM_OF_USER_POINTS * PI/180;
+        mUserPoints.col(i) = Vector3f(0.5 + RADIUS * glm::cos(angle_rad),0.5 + RADIUS * glm::sin(angle_rad),1.0f);
     }
     
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-    glBufferData(GL_ARRAY_BUFFER, userPoints.size() * sizeof(glm::vec3), &userPoints[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mUserPoints.size() * sizeof(GLfloat), mUserPoints.data(), GL_STATIC_DRAW);
 
     
 }
