@@ -19,14 +19,15 @@ namespace ebib {
     {
         
     private:
-//        const Patch _patch;
+        Patch _patch;
 //        const MatrixXf _queries;
         TrimeshSearcher<MatrixXf,MatrixXi> searcher;
         
     public:
         Processor(Patch inPatch);
         ~Processor();
-        MatrixXf process(MatrixXf inQueries);
+        void process(MatrixXf inQueries);
+        void pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries);
     };
 }
 

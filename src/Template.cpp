@@ -39,7 +39,7 @@ Template::Template(tdogl::Program& gProgram){
     MatrixXf points2(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            points2.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(i * 1.0 / (NUM_CONTROL_POINTS - 1),0.5f,0.5f + j * 0.5f / (NUM_CONTROL_POINTS - 1));
+            points2.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(i * 1.0 / (NUM_CONTROL_POINTS - 1),0.5f,j * 0.5f / (NUM_CONTROL_POINTS - 1));
     
     mPatch1 = surface.evaluateSurface(3, points1, NUM_CONTROL_POINTS, NUM_SAMPLES);
     mPatch1.triangles = triangles;
@@ -77,10 +77,10 @@ void Template::render() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glDrawElements(GL_TRIANGLES, mPatch1.triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
     
-//    glBindBuffer(GL_ARRAY_BUFFER, gVBO[2]);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[3]);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-//    glDrawElements(GL_TRIANGLES, mPatch2.triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO[2]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[3]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glDrawElements(GL_TRIANGLES, mPatch2.triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
  
     renderControlPoints();
 }

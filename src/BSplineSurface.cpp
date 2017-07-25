@@ -103,6 +103,7 @@ Patch BSplineSurface::evaluateSurface(int k, MatrixXf points, int noOfPoints, in
         }
     }
     Patch patch;
+    patch.points = points;
     patch.vertices = vertices;
     patch.weights = weigths;
     

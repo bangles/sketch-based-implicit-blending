@@ -57,7 +57,8 @@ void Scene::render(){
 }
 
 void Scene::process(){
-    drawTestPoints(_processor->process(userPoints->mUserPoints));
+//    drawTestPoints();
+    _processor->process(userPoints->mUserPoints);
 }
 
 void Scene::update(float deltaTime) {

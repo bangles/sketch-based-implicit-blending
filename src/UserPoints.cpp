@@ -20,18 +20,17 @@ UserPoints::UserPoints(tdogl::Program& gProgram){
     
     for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
         double angle_rad = i * -180.0/NUM_OF_USER_POINTS * PI/180;
-        mUserPoints.col(i) = Vector3f(0.5 + RADIUS * glm::cos(angle_rad),0.5 + RADIUS * glm::sin(angle_rad),1.0f);
+        mUserPoints.col(i) = Vector3f(0.5 + RADIUS * glm::cos(angle_rad),0.5 + RADIUS * glm::sin(angle_rad),0.0f);
     }
     
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
     glBufferData(GL_ARRAY_BUFFER, mUserPoints.size() * sizeof(GLfloat), mUserPoints.data(), GL_STATIC_DRAW);
-
     
 }
 
 void UserPoints::render(){
     glEnableVertexAttribArray(0);
-    gProgram->setUniform("myColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    gProgram->setUniform("myColor", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glDrawArrays(GL_POINTS, 0, NUM_OF_USER_POINTS);

@@ -20,6 +20,7 @@ namespace ebib {
     
     
     struct Patch{
+        MatrixXf points;
         MatrixXf vertices;
         MatrixXf weights;
         MatrixXi triangles;
