@@ -23,7 +23,7 @@ Scene::Scene(GLFWwindow& gWindow){
     grid = new Grid(3 * 44, *gProgram);
     gTemplate = new Template(*gProgram);
     userPoints = new UserPoints(*gProgram);
-    _processor = new Processor(gTemplate->mPatch1);
+    _processor = new Processor(gTemplate->mPatches);
     glGenVertexArrays(1, &gVAO);
     glBindVertexArray(gVAO);
 }
@@ -51,14 +51,16 @@ void Scene::render(){
     gTemplate->render();
     userPoints->render();
     
+//    drawTestPoints(gTemplate->mPatch1.points);
+    
     gProgram->stopUsing();
     glfwSwapBuffers(gWindow);
 
 }
 
 void Scene::process(){
-//    drawTestPoints();
     _processor->process(userPoints->mUserPoints);
+    gTemplate->updatePatches();
 }
 
 void Scene::update(float deltaTime) {
@@ -114,10 +116,6 @@ void Scene::cleanUp() {
 }
 
 void Scene::drawTestPoints(MatrixXf points) {
-    gProgram->use();
-    gProgram->setUniform("camera", gCamera.matrix());
-    gProgram->setUniform("model", glm::mat4(1.0f));
-    
     GLuint gVBO;
     glGenBuffers(1, &gVBO);
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
@@ -127,9 +125,7 @@ void Scene::drawTestPoints(MatrixXf points) {
     gProgram->setUniform("myColor", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glDrawArrays(GL_POINTS, 0, NUM_OF_USER_POINTS);
+    glDrawArrays(GL_POINTS, 0, points.cols());
     
-    gProgram->stopUsing();
-    glfwSwapBuffers(gWindow);
 }
 

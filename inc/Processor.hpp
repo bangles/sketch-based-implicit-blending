@@ -11,6 +11,7 @@
 
 #include "nnsearch.h"
 #include "Template.hpp"
+#include <math.h> 
 
 namespace ebib {
     using namespace Eigen;
@@ -19,15 +20,17 @@ namespace ebib {
     {
         
     private:
-        Patch _patch;
+        Patch* _patches;
 //        const MatrixXf _queries;
         TrimeshSearcher<MatrixXf,MatrixXi> searcher;
         
     public:
-        Processor(Patch inPatch);
+        Processor(Patch inPatches[]);
         ~Processor();
         void process(MatrixXf inQueries);
         void pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries);
+        void laplacianSliceEnergy(MatrixXf& A, VectorXf& b);
+
     };
 }
 

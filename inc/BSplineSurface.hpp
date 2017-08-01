@@ -15,30 +15,25 @@
 
 namespace ebib {
     using namespace Eigen;
-    
-    static const int NUM_SAMPLES = 100;
-    
+    static const int NUM_SAMPLES = 40;
     
     struct Patch{
         MatrixXf points;
+        MatrixXi grid;
         MatrixXf vertices;
-        MatrixXf weights;
         MatrixXi triangles;
+        MatrixXf weights;
     };
     
     class BSplineSurface {
+    
+    private:
+        float bSplineBasis(float U[], int o, int i, float u, int num_samples, int max_value);
     public:
-        
         BSplineSurface();
         ~BSplineSurface();
-    
-        float bSplineBasis(float U[], int o, int i, float u, int num_samples, int max_value);
-        Patch evaluateSurface(int k, MatrixXf points, int noOfPoints, int num_samples);
-        
-        private:
-        
+        void evaluateSurface(int k, Patch& patch, int noOfPoints, int num_samples);
     };
-    
 }
 
 #endif /* BSplineSurface_hpp */

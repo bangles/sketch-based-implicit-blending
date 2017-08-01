@@ -48,7 +48,7 @@ float BSplineSurface::bSplineBasis(float U[], int o, int i, float u, int num_sam
 }
 
 
-Patch BSplineSurface::evaluateSurface(int k, MatrixXf points, int noOfPoints, int num_samples) {
+void BSplineSurface::evaluateSurface(int k, Patch& patch, int noOfPoints, int num_samples) {
     
     float x[NUM_SAMPLES] = {};
     
@@ -78,9 +78,7 @@ Patch BSplineSurface::evaluateSurface(int k, MatrixXf points, int noOfPoints, in
         
     }
     
-    MatrixXf vertices(3,num_samples * num_samples);
-    vertices.setZero();
-    MatrixXf weigths(noOfPoints * noOfPoints,num_samples * num_samples);
+    patch.vertices.setZero();
     for (int a = 0; a < num_samples; a++)
     {
         for (int b = 0; b < num_samples; b++)
@@ -93,20 +91,14 @@ Patch BSplineSurface::evaluateSurface(int k, MatrixXf points, int noOfPoints, in
                 for (int j = 0; j < noOfPoints; j++)
                 {
                     float basis_1 = bSplineBasis(U, k, j, x[b], num_samples, max_value);
-                    p2 += basis_1 * points.col(noOfPoints*i + j);
+                    p2 += basis_1 * patch.points.col(noOfPoints*i + j);
                     weight(j * noOfPoints + i) = basis_1 * basis_2;
                 }
                 
-                vertices.col(b + num_samples * a) += basis_2 * p2;
+                patch.vertices.col(b + num_samples * a) += basis_2 * p2;
             }
-            weigths.col(b + num_samples * a) = weight;
+            patch.weights.col(b + num_samples * a) = weight;
         }
     }
-    Patch patch;
-    patch.points = points;
-    patch.vertices = vertices;
-    patch.weights = weigths;
-    
-    return patch;
 }
 

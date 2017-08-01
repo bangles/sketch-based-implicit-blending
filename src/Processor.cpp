@@ -11,38 +11,43 @@
 using namespace ebib;
 
 
-Processor::Processor(Patch inPatch){
-    _patch = inPatch;
-    searcher.build(inPatch.vertices, inPatch.triangles);
+Processor::Processor(Patch inPatches[]){
+    _patches = inPatches;
+//    searcher.build(_patches[0].vertices, _patches[0].triangles);
 }
 
 void Processor::process(MatrixXf inQueries) {
-    MatrixXf A1;
-    VectorXf b1;
+    MatrixXf points(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
     
-    pointToPlaneEnergy(A1, b1, inQueries);
+    points <<   _patches[0].points,
+                _patches[1].points;
     
+    MatrixXf A1, A2;
+    VectorXf b1, b2;
     
-//    int n = inQueries.cols();
-//    VectorXf w;
-//    
-//    w[0] = 1/n;
-//    w = w.sqrt();
-//    
-//    MatrixXf A;
-//    A.col(0) = A1 * w[0];
-//    
-//    
-//    MatrixXf b;
-//    b.col(0) = b1 * w[0];
-//
-//    
-////    MatrixXf Af = inQueries * (A.transpose() * A) * inQueries.transpose();
-////    MatrixXf bf = inQueries * A.transpose() * b;
-//    
-//    
-//    MatrixXf x = A1.colPivHouseholderQr().solve(b1);
+//    pointToPlaneEnergy(A1, b1, inQueries);
+    laplacianSliceEnergy(A2, b2);
     
+    int n = inQueries.cols();
+    VectorXf w(1);
+    w << sqrt(1.0/n);
+    
+    MatrixXf A(A1.rows(),A1.cols());
+    A << A1 * w[0];
+    
+    MatrixXf b(b1.rows(),b1.cols());
+    b <<  b1 * w[0];
+    
+    //    MatrixXf x = A.colPivHouseholderQr().solve(b);
+//    MatrixXf x = (A.transpose() * A).ldlt().solve(A.transpose() * b);
+    
+//    Map<MatrixXf> points(_patches[0].points.data(), _patches[0].points.size(), 1);
+//    MatrixXf x1 = points.cwiseProduct(x);
+//    
+//    Map<MatrixXf> solution(x1.data(), 3, x1.size()/3);
+//    LOG(solution);
+    
+    //    _patch->points = solution;
 }
 
 
@@ -53,25 +58,33 @@ void Processor::pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries)
     searcher.closest_point(inQueries, footpoints, findex);
     searcher.barycentric(footpoints, findex, barycentric);
     
-    A.resize(inQueries.cols(), _patch.points.cols() * 3);
+    A.resize(inQueries.cols(), _patches[0].points.cols() * 3);
     b.resize(inQueries.cols());
     
     for (int i = 0 ; i < inQueries.cols(); i++) {
-        Vector3i vIdx = _patch.triangles.col(findex[i]);
+        Vector3i vIdx = _patches[0].triangles.col(findex[i]);
         
         Vector3f n = footpoints.col(i) - inQueries.col(i);
         n.normalize();
-        
         VectorXf w = barycentric.col(i);
         
-        MatrixXf Wbi(_patch.points.cols(),3);
-        Wbi.col(0) = _patch.weights.col(vIdx[0]);
-        Wbi.col(1) = _patch.weights.col(vIdx[1]);
-        Wbi.col(2) = _patch.weights.col(vIdx[2]);
+        MatrixXf Wbi(3,_patches[0].points.cols());
+        Wbi.row(0) = _patches[0].weights.col(vIdx[0]);
+        Wbi.row(1) = _patches[0].weights.col(vIdx[1]);
+        Wbi.row(2) = _patches[0].weights.col(vIdx[2]);
+        VectorXf Wbw = w.transpose() * Wbi;
         
-        VectorXf Wbw = Wbi * w;
-
-        A.row(i) << (Wbw * n[0]).transpose(), (Wbw * n[1]).transpose(), (Wbw * n[2]).transpose();
+        VectorXf row(_patches[0].points.cols() * 3);
+        row << (Wbw * n[0]), (Wbw * n[1]), (Wbw * n[2]);
+        A.row(i) = row;
         b[i] = inQueries.col(i).dot(n);
     }
+}
+
+
+void Processor::laplacianSliceEnergy(MatrixXf& A, VectorXf& b) {
+//    A.resize(inQueries.cols(), _patch->points.cols() * 3);
+//    b.resize(inQueries.cols());
+    
+    
 }
