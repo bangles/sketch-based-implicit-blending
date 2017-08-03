@@ -11,16 +11,16 @@
 using namespace ebib;
 
 
-Processor::Processor(Patch inPatches[]){
-    _patches = inPatches;
-//    searcher.build(_patches[0].vertices, _patches[0].triangles);
+Processor::Processor(Template &inTemplate){
+    _template = &inTemplate;
+    searcher.build(_template->mPatches[0].vertices, _template->mPatches[0].triangles);
 }
 
 void Processor::process(MatrixXf inQueries) {
     MatrixXf points(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
     
-    points <<   _patches[0].points,
-                _patches[1].points;
+    points <<   _template->mPatches[0].points,
+                _template->mPatches[1].points;
     
     MatrixXf A1, A2;
     VectorXf b1, b2;
@@ -58,23 +58,23 @@ void Processor::pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries)
     searcher.closest_point(inQueries, footpoints, findex);
     searcher.barycentric(footpoints, findex, barycentric);
     
-    A.resize(inQueries.cols(), _patches[0].points.cols() * 3);
+    A.resize(inQueries.cols(), _template->mPatches[0].points.cols() * 3);
     b.resize(inQueries.cols());
     
     for (int i = 0 ; i < inQueries.cols(); i++) {
-        Vector3i vIdx = _patches[0].triangles.col(findex[i]);
+        Vector3i vIdx = _template->mPatches[0].triangles.col(findex[i]);
         
         Vector3f n = footpoints.col(i) - inQueries.col(i);
         n.normalize();
         VectorXf w = barycentric.col(i);
         
-        MatrixXf Wbi(3,_patches[0].points.cols());
-        Wbi.row(0) = _patches[0].weights.col(vIdx[0]);
-        Wbi.row(1) = _patches[0].weights.col(vIdx[1]);
-        Wbi.row(2) = _patches[0].weights.col(vIdx[2]);
+        MatrixXf Wbi(3,_template->mPatches[0].points.cols());
+        Wbi.row(0) = _template->mPatches[0].weights.col(vIdx[0]);
+        Wbi.row(1) = _template->mPatches[0].weights.col(vIdx[1]);
+        Wbi.row(2) = _template->mPatches[0].weights.col(vIdx[2]);
         VectorXf Wbw = w.transpose() * Wbi;
         
-        VectorXf row(_patches[0].points.cols() * 3);
+        VectorXf row(_template->mPatches[0].points.cols() * 3);
         row << (Wbw * n[0]), (Wbw * n[1]), (Wbw * n[2]);
         A.row(i) = row;
         b[i] = inQueries.col(i).dot(n);
@@ -83,8 +83,23 @@ void Processor::pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries)
 
 
 void Processor::laplacianSliceEnergy(MatrixXf& A, VectorXf& b) {
-//    A.resize(inQueries.cols(), _patch->points.cols() * 3);
+    int count = 0;
+    A.resize(0, _template->mPatches[0].points.cols() * 3);
 //    b.resize(inQueries.cols());
     
+    for(int i = 0; i< NUM_CONTROL_POINTS;i++)
+        for(int j = 1; j< NUM_CONTROL_POINTS - 1; j++)
+            for(int k = 0; k < 2; k++)  {
+                A(count,_template->meshInfo.slices(i,j-1)) = 1;
+                A(count,_template->meshInfo.slices(i,j)) = -2;
+                A(count,_template->meshInfo.slices(i,j+1)) = 1;
+                
+                A(++count,_template->meshInfo.slices(i,j-1)) = 1;
+                A(count,_template->meshInfo.slices(i,j)) = -2;
+                A(count,_template->meshInfo.slices(i,j+1)) = 1;
+            }
+    
+    b.resize(count,1);
+    b = MatrixXi::Zero(count, 1);
     
 }

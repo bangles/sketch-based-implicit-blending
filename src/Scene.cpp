@@ -23,7 +23,7 @@ Scene::Scene(GLFWwindow& gWindow){
     grid = new Grid(3 * 44, *gProgram);
     gTemplate = new Template(*gProgram);
     userPoints = new UserPoints(*gProgram);
-    _processor = new Processor(gTemplate->mPatches);
+    _processor = new Processor(*gTemplate);
     glGenVertexArrays(1, &gVAO);
     glBindVertexArray(gVAO);
 }
