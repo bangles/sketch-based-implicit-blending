@@ -83,7 +83,7 @@ void BSplineSurface::evaluateSurface(int k, Patch& patch, int noOfPoints, int nu
     {
         for (int b = 0; b < num_samples; b++)
         {
-            VectorXf weight(noOfPoints * noOfPoints);
+            RowVectorXf weight(noOfPoints * noOfPoints);
             for (int i = 0; i < noOfPoints; i++)
             {
                 Vector3f p2(0,0,0);
@@ -97,7 +97,7 @@ void BSplineSurface::evaluateSurface(int k, Patch& patch, int noOfPoints, int nu
                 
                 patch.vertices.col(b + num_samples * a) += basis_2 * p2;
             }
-            patch.weights.col(b + num_samples * a) = weight;
+            patch.weights.row(b + num_samples * a) = weight;
         }
     }
 }

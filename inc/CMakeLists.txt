@@ -10,4 +10,5 @@ set(PROJECT_INCLUDE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/UserPoints.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Processor.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/nnsearch.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Utils.h"
         PARENT_SCOPE)

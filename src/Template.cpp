@@ -17,8 +17,8 @@ Template::Template(tdogl::Program& gProgram){
     glGenBuffers(5, gVBO);
     
     mPatches[0].points = MatrixXf(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
-    mPatches[0].vertices = MatrixXf(3,NUM_SAMPLES * NUM_SAMPLES);;
-    mPatches[0].weights = MatrixXf(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,NUM_SAMPLES * NUM_SAMPLES);
+    mPatches[0].vertices = MatrixXf(3,NUM_SAMPLES * NUM_SAMPLES);
+    mPatches[0].weights = MatrixXf(NUM_SAMPLES * NUM_SAMPLES,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     mPatches[0].triangles = MatrixXi(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 2);
     mPatches[0].grid = VectorXi::LinSpaced(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,0,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS - 1);
     mPatches[0].grid.resize(NUM_CONTROL_POINTS, NUM_CONTROL_POINTS);
@@ -39,13 +39,9 @@ Template::Template(tdogl::Program& gProgram){
         }
     }
     
-    LOG(mPatches[0].points);
-    
-    LOG(mPatches[0].grid);
-    
     mPatches[1].points = MatrixXf(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     mPatches[1].vertices = MatrixXf(3,NUM_SAMPLES * NUM_SAMPLES);
-    mPatches[1].weights = MatrixXf(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,NUM_SAMPLES * NUM_SAMPLES);
+    mPatches[1].weights = MatrixXf(NUM_SAMPLES * NUM_SAMPLES,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     mPatches[1].triangles = mPatches[0].triangles + (NUM_SAMPLES * NUM_SAMPLES * MatrixXi::Ones(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 2));
     mPatches[1].grid = VectorXi::LinSpaced(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS, 2 * NUM_CONTROL_POINTS * NUM_CONTROL_POINTS - 1);
     mPatches[1].grid.resize(NUM_CONTROL_POINTS, NUM_CONTROL_POINTS);
@@ -125,11 +121,10 @@ void Template::processPoints() {
     meshInfo.line0o = mPatches[0].grid.col(1);
     meshInfo.line0o = mPatches[1].grid.col(1);
     
-    meshInfo.slices.resize(NUM_CONTROL_POINTS * 2, NUM_CONTROL_POINTS);
+    meshInfo.slices.resize(NUM_CONTROL_POINTS , NUM_CONTROL_POINTS * 2);
     
     for(int i=0; i < NUM_CONTROL_POINTS; i++) {
-        meshInfo.slices.col(i) <<   mPatches[0].grid.row(i).transpose(),
-                                    mPatches[1].grid.row(i).transpose();
+        meshInfo.slices.row(i) <<   mPatches[0].grid.row(i), mPatches[1].grid.row(i);
     }
 }
 

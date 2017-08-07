@@ -15,6 +15,7 @@ include_directories(
 		"${CMAKE_SOURCE_DIR}/external/glfw-3.1.2/include/"
 		"${CMAKE_SOURCE_DIR}/external/glm-0.9.7.1/"
 		"${CMAKE_SOURCE_DIR}/external/glew-1.13.0/include/"
+        "${CMAKE_SOURCE_DIR}/external/libigl/include/"
         "/usr/local/include"
         "/usr/local/include/eigen3/"
 		)
