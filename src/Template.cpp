@@ -112,14 +112,14 @@ void Template::processPoints() {
     MatrixXf vertices(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
     
     vertices << mPatches[0].points,
-    mPatches[1].points;
+                mPatches[1].points;
     
     meshInfo.line0 = mPatches[0].grid.col(0);
     meshInfo.line1 = mPatches[1].grid.col(0);
     meshInfo.spine0 = mPatches[0].grid.col(NUM_CONTROL_POINTS - 1);
     meshInfo.spine1 = mPatches[1].grid.col(NUM_CONTROL_POINTS - 1);
     meshInfo.line0o = mPatches[0].grid.col(1);
-    meshInfo.line0o = mPatches[1].grid.col(1);
+    meshInfo.line1o = mPatches[1].grid.col(1);
     
     meshInfo.slices.resize(NUM_CONTROL_POINTS , NUM_CONTROL_POINTS * 2);
     

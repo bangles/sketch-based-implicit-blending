@@ -33,9 +33,17 @@ void Processor::process(MatrixXf inQueries) {
     MatrixXf A0, A1, A2, A3, A4, A5, A6;
     VectorXf b0, b1, b2, b3, b4, b5, b6;
     
-    MatrixXf MC;
+    MatrixXi MC = mergedDOFs();
+    MatrixXf R = MatrixXf::Identity(_points.size(), _points.size());
     
-    mergedDOFs(MC);
+    if(MC.size() != 0) {
+        for(int i = 0; i < MC.rows(); i++ ) {
+            R(MC(i,1),MC(i,0)) = 1;
+        }
+        
+        removeColumns(R, MC.col(1));
+    }
+    
     
     pointToPlaneEnergy(A0, b0, inQueries);
 //    laplacianSliceEnergy(A2, b2);
@@ -61,7 +69,9 @@ void Processor::process(MatrixXf inQueries) {
             b3 * w[3],
             b6 * w[6];
     
+    A = A * R;
     MatrixXf x = A.colPivHouseholderQr().solve(b);
+    x = R * x;
     Map<MatrixXf> solution(x.data(), 3, x.size()/3);
     
     LOG(solution);
@@ -71,60 +81,116 @@ void Processor::process(MatrixXf inQueries) {
     _template->mPatches[1].points = solution.rightCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
 }
 
-void Processor::mergedDOFs(MatrixXf& MC) {
+void Processor::removeColumns(MatrixXf& R, VectorXi columns){
+    
+    VectorXi output,indexes;
+    igl::unique(columns,output);
+    columns = output;
+    igl::sort(columns,1,false,output,indexes);
+    
+    std::vector<VectorXf> A;
+    for(int i = 0; i < R.cols(); i++ ) {
+        A.push_back(R.col(i));
+    }
+    
+    for(int i = 0; i < columns.size(); i++ ) {
+        A.erase(A.begin() + output(i));
+    }
+    
+    R.resize(R.rows(),A.size());
+    
+    for(int i = 0; i < A.size(); i++ ) {
+        R.col(i) = A[i];
+    }
+    
+}
+
+MatrixXi Processor::mergedDOFs() {
     int s = _points.cols();
+    MatrixXi MC(170,2);
     
     VectorXi s1 = VectorXi::Ones(NUM_CONTROL_POINTS) * s;
-    VectorXi s2 = VectorXi::Ones(NUM_CONTROL_POINTS * 2) * s;
-    int end = NUM_CONTROL_POINTS;
+    RowVectorXi s2 = RowVectorXi::Ones(NUM_CONTROL_POINTS * 2) * s;
+    int end = NUM_CONTROL_POINTS - 1;
+    int lastRow = 0;
     
+    push(MC,lastRow,_template->meshInfo.spine0,_template->meshInfo.spine1);
+    push(MC,lastRow,_template->meshInfo.spine0 + s1, _template->meshInfo.spine1  + s1);
+    push(MC,lastRow,_template->meshInfo.spine0 + 2*s1, _template->meshInfo.spine1  + 2*s1);
+
+    push(MC,lastRow,_template->meshInfo.line0, _template->meshInfo.line0o);
+    push(MC,lastRow,_template->meshInfo.line0 + 2*s1, _template->meshInfo.line0o + 2*s1);
     
-    MC <<
-    _template->meshInfo.spine0, _template->meshInfo.spine1,
-    _template->meshInfo.spine0 + s1, _template->meshInfo.spine1  + s1,
-    _template->meshInfo.spine0 + 2*s1, _template->meshInfo.spine1  + 2*s1,
+    push(MC,lastRow,_template->meshInfo.line1 + s1, _template->meshInfo.line1o + s1);
+    push(MC,lastRow,_template->meshInfo.line1 + 2*s1, _template->meshInfo.line1o + 2*s1);
     
-    _template->meshInfo.line0, _template->meshInfo.line0o,
-    _template->meshInfo.line0 + 2*s1, _template->meshInfo.line0o + 2*s1,
-    
-    _template->meshInfo.line1 + s1, _template->meshInfo.line1o + s1,
-    _template->meshInfo.line1 + 2*s1, _template->meshInfo.line1o + 2*s1,
-    
-    _template->meshInfo.slices(1), _template->meshInfo.slices(2),
-    _template->meshInfo.slices.row(1) + s2, _template->meshInfo.slices.row(2) + s2,
-    
-    _template->meshInfo.slices(end), _template->meshInfo.slices(end - 1),
-    _template->meshInfo.slices.row(end) + s2, _template->meshInfo.slices.row(end - 1) + s2;
-    
+    push(MC,lastRow,_template->meshInfo.slices.row(0), _template->meshInfo.slices.row(1));
+    push(MC,lastRow,_template->meshInfo.slices.row(0) + s2, _template->meshInfo.slices.row(1) + s2);
+
+    push(MC,lastRow,_template->meshInfo.slices.row(end), _template->meshInfo.slices.row(end - 1));
+    push(MC,lastRow,_template->meshInfo.slices.row(end) + s2, _template->meshInfo.slices.row(end - 1) + s2);
+
     for(int i = 0; i < NUM_CONTROL_POINTS; i++) {
         for(int j = 1; j < 2 * NUM_CONTROL_POINTS; j++) {
-            MC <<
-            _template->meshInfo.slices(i,1) + 2 * s, _template->meshInfo.slices(i,j) + 2 * s;
+            push(MC,lastRow,_template->meshInfo.slices(i,1) + 2 * s, _template->meshInfo.slices(i,j) + 2 * s);
         }
         
         for(int j = 0; j < 2 * NUM_CONTROL_POINTS; j++) {
-            MC <<
-            _template->meshInfo.slices(i,j) + 2 * s, _template->meshInfo.slices(i,2 * NUM_CONTROL_POINTS - j) +  s;
+            push(MC,lastRow,_template->meshInfo.slices(i,j) + 2 * s, _template->meshInfo.slices(i,2 * NUM_CONTROL_POINTS - j - 1) +  s);
         }
     }
+
+    VectorXi indexes, output;
+    igl::sort(MC.col(1),1,true,output,indexes);
+    std::vector<VectorXi> A = convertToArray(MC, indexes);
     
-    
-    for(int i = 0; i < MC.rows();i++) {
-        for(int j = 0; j < MC.rows();j++) {
+    for(int i = 0; i < A.size();i++) {
+        for(int j = 0; j < A.size();j++) {
             if (j == i)
                 continue;
-            MatrixXf IA,LOCB;
-            igl::ismember(MC.row(i),MC.row(j),IA,LOCB);
-            
-            if(IA.array().any()) {
-//                a{i} = [a{i} a{j}];
+
+            igl::ismember(A[i], A[j], indexes, output);
+
+            if(indexes.array().any()) {
+                VectorXi temp(A[i].size() + A[j].size());
+                temp << A[i], A[j];
+                A[i] = temp;
+                A.erase(A.begin() + j);
             }
-            
-//            a(lg) = [];
-            
+        }
+    }
+
+    MC.resize(159,2);
+    
+    lastRow = 0;
+    for(int i = 0; i < A.size();i++) {
+        igl::unique(A[i],output);
+        for(int j = 1; j < output.size(); j++) {
+            MC.row(lastRow++) << output[0],output[j];
         }
     }
     
+    return MC;
+}
+
+std::vector<VectorXi> Processor::convertToArray(MatrixXi& MC, VectorXi& IX) {
+    std::vector<VectorXi> A;
+    for(int i = 0; i < IX.size(); i++ ) {
+        A.push_back(MC.row(IX(i)));
+    }
+    return A;
+}
+
+
+void Processor::push(MatrixXi& MC, int& lastRow, VectorXi a, VectorXi b) {
+    int count = a.size();
+    MC.block(lastRow,0,count,2) << a,b;
+    lastRow+=count;
+}
+
+void Processor::push(MatrixXi& MC, int& lastRow, int a, int b) {
+    MC.block(lastRow,0,1,2) << a,b;
+    lastRow++;
 }
 
 

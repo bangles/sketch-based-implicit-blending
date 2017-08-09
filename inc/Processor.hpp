@@ -13,6 +13,10 @@
 #include "Template.hpp"
 #include "Utils.h"
 #include <igl/ismember.h>
+#include <igl/sort.h>
+#include <igl/slice.h>
+#include <igl/unique.h>
+#include <vector>
 #include <math.h>
 
 namespace ebib {
@@ -34,7 +38,11 @@ namespace ebib {
         Processor(Template &inTemplate);
         ~Processor();
         void process(MatrixXf inQueries);
-        void mergedDOFs(MatrixXf& MC);
+        void push(MatrixXi& MC, int& lastRow, VectorXi a, VectorXi b);
+        void push(MatrixXi& MC, int& lastRow, int a, int b);
+        std::vector<VectorXi> convertToArray(MatrixXi& MC, VectorXi& IX);
+        void removeColumns(MatrixXf& R, VectorXi columns);
+        MatrixXi mergedDOFs();
         void pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries);
         void tikhonovEnergy(MatrixXf& A, VectorXf& b);
         void spineSmoothEnergy(MatrixXf& A, VectorXf& b);
