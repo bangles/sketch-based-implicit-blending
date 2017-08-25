@@ -10,9 +10,12 @@
 
 using namespace ebib;
 
-
 Processor::Processor(Template &inTemplate){
     _template = &inTemplate;
+    updateSearcher();
+}
+
+void Processor::updateSearcher() {
     _points.resize(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
     _points <<_template->mPatches[0].points, _template->mPatches[1].points;
     
@@ -26,7 +29,8 @@ Processor::Processor(Template &inTemplate){
     MatrixXf zeroWeights = MatrixXf::Zero(_template->mPatches[0].weights.rows(),_template->mPatches[0].weights.cols());
     _weights <<_template->mPatches[0].weights, zeroWeights, zeroWeights, _template->mPatches[1].weights;
     
-    searcher.build(_vertices, _triangles);
+    searcher = new TrimeshSearcher<MatrixXf,MatrixXi>();
+    searcher->build(_vertices, _triangles);
 }
 
 void Processor::process(MatrixXf inQueries) {
@@ -52,9 +56,11 @@ void Processor::process(MatrixXf inQueries) {
     
     int n = inQueries.cols();
     VectorXf w = VectorXf::Zero(7);
-    w(0) = sqrt(1.0/n);
+    w(0) = 1.0/n;
     w(3) = glm::pow(10, -3); // Tikhonov
     w(6) = glm::pow(10, -1); // Spine Smoothness
+    
+    w = w.cwiseSqrt();
     
     int rowsA = A0.rows() + A3.rows() + A6.rows();
     int rowsB = b0.rows() + b3.rows() + b6.rows();
@@ -69,20 +75,18 @@ void Processor::process(MatrixXf inQueries) {
             b3 * w[3],
             b6 * w[6];
     
+    
     A = A * R;
     MatrixXf x = A.colPivHouseholderQr().solve(b);
     x = R * x;
-    Map<MatrixXf> solution(x.data(), 3, x.size()/3);
     
-    LOG(solution);
-    Utils::writeToCSVfile("solution", solution);
+    Map<Matrix<float,Dynamic,Dynamic,RowMajor>> solution(x.data(), 3, x.size()/3);
     
     _template->mPatches[0].points = solution.leftCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     _template->mPatches[1].points = solution.rightCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
 }
 
 void Processor::removeColumns(MatrixXf& R, VectorXi columns){
-    
     VectorXi output,indexes;
     igl::unique(columns,output);
     columns = output;
@@ -132,19 +136,31 @@ MatrixXi Processor::mergedDOFs() {
 
     for(int i = 0; i < NUM_CONTROL_POINTS; i++) {
         for(int j = 1; j < 2 * NUM_CONTROL_POINTS; j++) {
-            push(MC,lastRow,_template->meshInfo.slices(i,1) + 2 * s, _template->meshInfo.slices(i,j) + 2 * s);
+            push(MC,lastRow,_template->meshInfo.slices(i,0) + 2*s, _template->meshInfo.slices(i,j) + 2*s);
         }
         
-        for(int j = 0; j < 2 * NUM_CONTROL_POINTS; j++) {
-            push(MC,lastRow,_template->meshInfo.slices(i,j) + 2 * s, _template->meshInfo.slices(i,2 * NUM_CONTROL_POINTS - j - 1) +  s);
+        for(int j = 0; j < NUM_CONTROL_POINTS; j++) {
+            push(MC,lastRow,_template->meshInfo.slices(i,j), _template->meshInfo.slices(i,NUM_CONTROL_POINTS + j) +  s);
+            push(MC,lastRow,_template->meshInfo.slices(i,j) + s, _template->meshInfo.slices(i,NUM_CONTROL_POINTS + j));
         }
     }
-
+    
+//    LOG("MC");
+//    LOG(MC);
+    
     VectorXi indexes, output;
     igl::sort(MC.col(1),1,true,output,indexes);
     std::vector<VectorXi> A = convertToArray(MC, indexes);
+    std::vector<int> duplicateIndexes;
+//    
+//    for(int i = 0; i < A.size(); i++) {
+//        LOG(A[i][0] << " " << A[i][1]);
+//    }
+    
     
     for(int i = 0; i < A.size();i++) {
+        duplicateIndexes.clear();
+        
         for(int j = 0; j < A.size();j++) {
             if (j == i)
                 continue;
@@ -155,12 +171,17 @@ MatrixXi Processor::mergedDOFs() {
                 VectorXi temp(A[i].size() + A[j].size());
                 temp << A[i], A[j];
                 A[i] = temp;
-                A.erase(A.begin() + j);
+                duplicateIndexes.push_back(j);
             }
         }
+        
+        for(int j = duplicateIndexes.size() - 1; j >= 0; j--) {
+            A.erase(A.begin() + duplicateIndexes[j]);
+        }
     }
-
-    MC.resize(159,2);
+    
+    duplicateIndexes.clear();
+    MC.resize(124,2);
     
     lastRow = 0;
     for(int i = 0; i < A.size();i++) {
@@ -198,8 +219,8 @@ void Processor::pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries)
     MatrixXf footpoints(3,inQueries.cols()),barycentric(3,inQueries.cols());
     VectorXi findex(inQueries.cols());
     
-    searcher.closest_point(inQueries, footpoints, findex);
-    searcher.barycentric(footpoints, findex, barycentric);
+    searcher->closest_point(inQueries, footpoints, findex);
+    searcher->barycentric(footpoints, findex, barycentric);
     
     A.resize(inQueries.cols(), _points.cols() * 3);
     b.resize(inQueries.cols());
@@ -216,9 +237,6 @@ void Processor::pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries)
                 _weights.row(vIdx[1]),
                 _weights.row(vIdx[2]);
         
-//        Wbi.col(0) = _weights.row(vIdx[0]).transpose();
-//        Wbi.col(1) = _weights.row(vIdx[1]).transpose();
-//        Wbi.col(2) = _weights.row(vIdx[2]).transpose();
         VectorXf Wbw = w.transpose() * Wbi;
         
         VectorXf row(_points.cols() * 3);
@@ -247,14 +265,15 @@ void Processor::laplacianSliceEnergy(MatrixXf& A, VectorXf& b) {
                 A(count++,_template->meshInfo.slices(i,end - j + 1) + k * size) = 1;
             }
     
-    Utils::writeToCSVfile("laplacianSliceEnergy.csv", A);
+    Utils::writeMatrixXfToCSVfile("laplacianSliceEnergy.csv", A);
     
     b = MatrixXf::Zero(count, 1);
     
 }
 
 void Processor::tikhonovEnergy(MatrixXf& A, VectorXf& b) {
-    b = Map<MatrixXf>(_points.data(), _points.size(), 1);
+    Matrix<float,Dynamic,Dynamic,RowMajor> Z(_points);
+    b = Map<MatrixXf>(Z.data(), Z.size(), 1);
     A = MatrixXf::Identity(_points.size(),_points.size());
 }
 
@@ -265,9 +284,9 @@ void Processor::spineSmoothEnergy(MatrixXf& A, VectorXf& b) {
     
     for(int i = 0; i< NUM_CONTROL_POINTS; i++)
         for(int k = 0; k < 3; k++)  {
-            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,NUM_CONTROL_POINTS - 1) + k * size) = 1;
-            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,NUM_CONTROL_POINTS) + k * size) = 1;
-            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,NUM_CONTROL_POINTS + 2) + k * size) = 1;
+            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,NUM_CONTROL_POINTS - 2) + k * size) = 1;
+            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,NUM_CONTROL_POINTS - 1) + k * size) = -2;
+            A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,2 * NUM_CONTROL_POINTS - 2) + k * size) = 1;
         }
 }
 

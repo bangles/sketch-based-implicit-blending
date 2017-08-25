@@ -32,7 +32,7 @@ namespace ebib {
         MatrixXi _triangles;
         MatrixXf _weights;
         
-        TrimeshSearcher<MatrixXf,MatrixXi> searcher;
+        TrimeshSearcher<MatrixXf,MatrixXi>* searcher;
         
     public:
         Processor(Template &inTemplate);
@@ -43,6 +43,7 @@ namespace ebib {
         std::vector<VectorXi> convertToArray(MatrixXi& MC, VectorXi& IX);
         void removeColumns(MatrixXf& R, VectorXi columns);
         MatrixXi mergedDOFs();
+        void updateSearcher();
         void pointToPlaneEnergy(MatrixXf& A, VectorXf& b, MatrixXf inQueries);
         void tikhonovEnergy(MatrixXf& A, VectorXf& b);
         void spineSmoothEnergy(MatrixXf& A, VectorXf& b);

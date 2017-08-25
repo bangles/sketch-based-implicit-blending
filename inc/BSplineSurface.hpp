@@ -12,7 +12,6 @@
 #include <Eigen/Dense>
 #include <GL/glew.h>
 
-
 namespace ebib {
     using namespace Eigen;
     static const int NUM_SAMPLES = 40;

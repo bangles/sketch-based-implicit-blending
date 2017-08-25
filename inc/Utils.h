@@ -19,9 +19,9 @@ namespace ebib {
     private:
         const static IOFormat CSVFormat;
     public:
-        static bool writeToCSVfile(string name, MatrixXf matrix);
+        static bool writeMatrixXiToCSVfile(string name, MatrixXi& matrix);
+        static bool writeMatrixXfToCSVfile(string name, MatrixXf& matrix);
     };
-    
 }
 
 

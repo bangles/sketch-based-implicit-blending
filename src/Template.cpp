@@ -25,7 +25,7 @@ Template::Template(tdogl::Program& gProgram){
     
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            mPatches[0].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(0.5f, i * 0.5f / (NUM_CONTROL_POINTS - 1), j * 1.0f / (NUM_CONTROL_POINTS - 1));
+            mPatches[0].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(0.5f, j * 0.5f / (NUM_CONTROL_POINTS - 1), i * 1.0f / (NUM_CONTROL_POINTS - 1));
     
     int count = 0;
     for (int a = 0; a < NUM_SAMPLES - 1; a++)
@@ -33,9 +33,16 @@ Template::Template(tdogl::Program& gProgram){
         for (int b = 0; b < NUM_SAMPLES - 1; b++)
         {
             //Triangle 1
-            mPatches[0].triangles.col(count++) = Vector3i(a * NUM_SAMPLES + b, (a + 1)*NUM_SAMPLES + b, (a + 1)*NUM_SAMPLES + b + 1);
+            mPatches[0].triangles.col(count++) = Vector3i(a * NUM_SAMPLES + b, a * NUM_SAMPLES + (b + 1), (a + 1) * NUM_SAMPLES + (b + 1));
+        }
+    }
+    
+    for (int a = 0; a < NUM_SAMPLES - 1; a++)
+    {
+        for (int b = 0; b < NUM_SAMPLES - 1; b++)
+        {
             //Triangle 2
-            mPatches[0].triangles.col(count++) = Vector3i(a * NUM_SAMPLES + b, a*NUM_SAMPLES + b + 1, (a + 1)*NUM_SAMPLES + b + 1);
+            mPatches[0].triangles.col(count++) = Vector3i(a * NUM_SAMPLES + b, (a + 1) * NUM_SAMPLES + (b + 1), (a + 1) * NUM_SAMPLES + b);
         }
     }
     
@@ -45,12 +52,10 @@ Template::Template(tdogl::Program& gProgram){
     mPatches[1].triangles = mPatches[0].triangles + (NUM_SAMPLES * NUM_SAMPLES * MatrixXi::Ones(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 2));
     mPatches[1].grid = VectorXi::LinSpaced(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS, 2 * NUM_CONTROL_POINTS * NUM_CONTROL_POINTS - 1);
     mPatches[1].grid.resize(NUM_CONTROL_POINTS, NUM_CONTROL_POINTS);
-
-
     
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            mPatches[1].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(i * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f, j * 1.0f / (NUM_CONTROL_POINTS - 1));
+            mPatches[1].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(j * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f, i * 1.0f / (NUM_CONTROL_POINTS - 1));
     
     surface.evaluateSurface(3, mPatches[0], NUM_CONTROL_POINTS, NUM_SAMPLES);
     surface.evaluateSurface(3, mPatches[1], NUM_CONTROL_POINTS, NUM_SAMPLES);
@@ -62,6 +67,33 @@ Template::Template(tdogl::Program& gProgram){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mPatches[1].triangles.size() * sizeof(int), mPatches[1].triangles.data(), GL_STATIC_DRAW);
     
     processPoints();
+    
+//    LOG("grid0");
+//    LOG(mPatches[0].grid);
+//    
+//    LOG("grid1");
+//    LOG(mPatches[1].grid);
+    
+//    LOG("line0");
+//    LOG(meshInfo.line0);
+//    
+//    LOG("line1");
+//    LOG(meshInfo.line1);
+//    
+//    LOG("line0o");
+//    LOG(meshInfo.line0o);
+//    
+//    LOG("line1o");
+//    LOG(meshInfo.line1o);
+//    
+//    LOG("spine0");
+//    LOG(meshInfo.spine0);
+//    
+//    LOG("spine1");
+//    LOG(meshInfo.spine1);
+    
+//    LOG("slices");
+//    LOG(meshInfo.slices);
 }
 
 
@@ -114,17 +146,17 @@ void Template::processPoints() {
     vertices << mPatches[0].points,
                 mPatches[1].points;
     
-    meshInfo.line0 = mPatches[0].grid.col(0);
-    meshInfo.line1 = mPatches[1].grid.col(0);
-    meshInfo.spine0 = mPatches[0].grid.col(NUM_CONTROL_POINTS - 1);
-    meshInfo.spine1 = mPatches[1].grid.col(NUM_CONTROL_POINTS - 1);
-    meshInfo.line0o = mPatches[0].grid.col(1);
-    meshInfo.line1o = mPatches[1].grid.col(1);
+    meshInfo.line0 = mPatches[0].grid.row(0);
+    meshInfo.line1 = mPatches[1].grid.row(0);
+    meshInfo.spine0 = mPatches[0].grid.row(NUM_CONTROL_POINTS - 1);
+    meshInfo.spine1 = mPatches[1].grid.row(NUM_CONTROL_POINTS - 1);
+    meshInfo.line0o = mPatches[0].grid.row(1);
+    meshInfo.line1o = mPatches[1].grid.row(1);
     
     meshInfo.slices.resize(NUM_CONTROL_POINTS , NUM_CONTROL_POINTS * 2);
     
     for(int i=0; i < NUM_CONTROL_POINTS; i++) {
-        meshInfo.slices.row(i) <<   mPatches[0].grid.row(i), mPatches[1].grid.row(i);
+        meshInfo.slices.row(i) <<   mPatches[1].grid.col(i).transpose(), mPatches[0].grid.col(i).transpose();
     }
 }
 

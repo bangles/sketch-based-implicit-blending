@@ -61,6 +61,7 @@ void Scene::render(){
 void Scene::process(){
     _processor->process(userPoints->mUserPoints);
     gTemplate->updatePatches();
+    _processor->updateSearcher();
 }
 
 void Scene::update(float deltaTime) {

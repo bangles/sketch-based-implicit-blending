@@ -1,6 +1,9 @@
 #include "BSplineSurface.hpp"
+#include <iostream>
 
 using namespace ebib;
+
+#define LOG(x) std::cout << x << std::endl
 
 BSplineSurface::BSplineSurface(){
     
@@ -95,9 +98,9 @@ void BSplineSurface::evaluateSurface(int k, Patch& patch, int noOfPoints, int nu
                     weight(j * noOfPoints + i) = basis_1 * basis_2;
                 }
                 
-                patch.vertices.col(b + num_samples * a) += basis_2 * p2;
+                patch.vertices.col(a * num_samples + b) += basis_2 * p2;
             }
-            patch.weights.row(b + num_samples * a) = weight;
+            patch.weights.row(a + num_samples * b) = weight;
         }
     }
 }
