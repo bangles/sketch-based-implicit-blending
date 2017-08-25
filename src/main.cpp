@@ -70,7 +70,7 @@ void AppMain() {
     glDepthFunc(GL_LESS);
     glEnable(GL_POINT_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPointSize(14.0f);
+    glPointSize(10.0f);
     
     scene = new Scene(*gWindow);
     

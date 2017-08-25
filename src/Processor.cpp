@@ -13,6 +13,7 @@ using namespace ebib;
 Processor::Processor(Template &inTemplate){
     _template = &inTemplate;
     updateSearcher();
+    iter = 0;
 }
 
 void Processor::updateSearcher() {
@@ -34,6 +35,7 @@ void Processor::updateSearcher() {
 }
 
 void Processor::process(MatrixXf inQueries) {
+    iter++;
     MatrixXf A0, A1, A2, A3, A4, A5, A6;
     VectorXf b0, b1, b2, b3, b4, b5, b6;
     
@@ -50,28 +52,35 @@ void Processor::process(MatrixXf inQueries) {
     
     
     pointToPlaneEnergy(A0, b0, inQueries);
-//    laplacianSliceEnergy(A2, b2);
+    laplacianSliceEnergy(A1, b1);
+    laplacianLineEnergy(A2, b2);
     tikhonovEnergy(A3, b3);
     spineSmoothEnergy(A6, b6);
     
     int n = inQueries.cols();
     VectorXf w = VectorXf::Zero(7);
     w(0) = 1.0/n;
+    w(1) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Slice smoothness
+    w(2) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Line smoothness
     w(3) = glm::pow(10, -3); // Tikhonov
     w(6) = glm::pow(10, -1); // Spine Smoothness
     
     w = w.cwiseSqrt();
     
-    int rowsA = A0.rows() + A3.rows() + A6.rows();
-    int rowsB = b0.rows() + b3.rows() + b6.rows();
+    int rowsA = A0.rows() + A1.rows() + A2.rows() + A3.rows() + A6.rows();
+    int rowsB = b0.rows() + b1.rows() + b2.rows() + b3.rows() + b6.rows();
     
     MatrixXf A(rowsA, A0.cols());
     A <<    A0 * w[0],
+            A1 * w[1],
+            A2 * w[2],
             A3 * w[3],
             A6 * w[6];
     
     MatrixXf b(rowsB, b0.cols());
     b <<    b0 * w[0],
+            b1 * w[1],
+            b2 * w[2],
             b3 * w[3],
             b6 * w[6];
     
@@ -145,18 +154,10 @@ MatrixXi Processor::mergedDOFs() {
         }
     }
     
-//    LOG("MC");
-//    LOG(MC);
-    
     VectorXi indexes, output;
     igl::sort(MC.col(1),1,true,output,indexes);
     std::vector<VectorXi> A = convertToArray(MC, indexes);
     std::vector<int> duplicateIndexes;
-//    
-//    for(int i = 0; i < A.size(); i++) {
-//        LOG(A[i][0] << " " << A[i][1]);
-//    }
-    
     
     for(int i = 0; i < A.size();i++) {
         duplicateIndexes.clear();
@@ -265,10 +266,24 @@ void Processor::laplacianSliceEnergy(MatrixXf& A, VectorXf& b) {
                 A(count++,_template->meshInfo.slices(i,end - j + 1) + k * size) = 1;
             }
     
-    Utils::writeMatrixXfToCSVfile("laplacianSliceEnergy.csv", A);
-    
     b = MatrixXf::Zero(count, 1);
     
+}
+
+void Processor::laplacianLineEnergy(MatrixXf& A, VectorXf& b) {
+    int count = 0;
+    int size = _points.cols();
+    A = MatrixXf::Zero((NUM_CONTROL_POINTS - 2) * 2 * NUM_CONTROL_POINTS * 3 , size * 3);
+    
+    for(int i = 1; i< NUM_CONTROL_POINTS-1; i++)
+        for(int j = 0; j< 2 * NUM_CONTROL_POINTS; j++)
+            for(int k = 0; k < 3; k++)  {
+                A(count,_template->meshInfo.slices(i-1 ,j)  + k * size) = 1;
+                A(count,_template->meshInfo.slices(i,j)     + k * size) = -2;
+                A(count++,_template->meshInfo.slices(i+1, j)+ k * size) = 1;
+            }
+    
+    b = MatrixXf::Zero(count, 1);
 }
 
 void Processor::tikhonovEnergy(MatrixXf& A, VectorXf& b) {

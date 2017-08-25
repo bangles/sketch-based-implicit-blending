@@ -106,15 +106,26 @@ void Template::render() {
     
     glBindBuffer(GL_ARRAY_BUFFER, gVBO[0]);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     gProgram->setUniform("myColor", glm::vec4(0.0f, 1.0f, 0.5f, 0.7f));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glDrawElements(GL_TRIANGLES, mPatches[0].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[2]);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glDrawElements(GL_TRIANGLES, mPatches[1].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
+    
+//    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+//    gProgram->setUniform("myColor", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+//    
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
+//    glDrawElements(GL_TRIANGLES, mPatches[0].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
+//    
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[2]);
+//    glDrawElements(GL_TRIANGLES, mPatches[1].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
  
     renderControlPoints();
 }

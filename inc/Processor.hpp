@@ -31,6 +31,7 @@ namespace ebib {
         MatrixXf _vertices;
         MatrixXi _triangles;
         MatrixXf _weights;
+        int iter;
         
         TrimeshSearcher<MatrixXf,MatrixXi>* searcher;
         
@@ -48,8 +49,7 @@ namespace ebib {
         void tikhonovEnergy(MatrixXf& A, VectorXf& b);
         void spineSmoothEnergy(MatrixXf& A, VectorXf& b);
         void laplacianSliceEnergy(MatrixXf& A, VectorXf& b);
-        
-
+        void laplacianLineEnergy(MatrixXf& A, VectorXf& b);
     };
 }
 
