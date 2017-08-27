@@ -55,6 +55,7 @@ void Processor::process(MatrixXf inQueries) {
     laplacianSliceEnergy(A1, b1);
     laplacianLineEnergy(A2, b2);
     tikhonovEnergy(A3, b3);
+    fixedPointEnergy(A4, b4);
     spineSmoothEnergy(A6, b6);
     
     int n = inQueries.cols();
@@ -63,18 +64,20 @@ void Processor::process(MatrixXf inQueries) {
     w(1) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Slice smoothness
     w(2) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Line smoothness
     w(3) = glm::pow(10, -3); // Tikhonov
+    w(4) = glm::pow(10, 1); // Fixed point energy
     w(6) = glm::pow(10, -1); // Spine Smoothness
     
     w = w.cwiseSqrt();
     
-    int rowsA = A0.rows() + A1.rows() + A2.rows() + A3.rows() + A6.rows();
-    int rowsB = b0.rows() + b1.rows() + b2.rows() + b3.rows() + b6.rows();
+    int rowsA = A0.rows() + A1.rows() + A2.rows() + A3.rows() + A4.rows() + A6.rows();
+    int rowsB = b0.rows() + b1.rows() + b2.rows() + b3.rows() + b4.rows() + b6.rows();
     
     MatrixXf A(rowsA, A0.cols());
     A <<    A0 * w[0],
             A1 * w[1],
             A2 * w[2],
             A3 * w[3],
+            A4 * w[4],
             A6 * w[6];
     
     MatrixXf b(rowsB, b0.cols());
@@ -82,6 +85,7 @@ void Processor::process(MatrixXf inQueries) {
             b1 * w[1],
             b2 * w[2],
             b3 * w[3],
+            b4 * w[4],
             b6 * w[6];
     
     
@@ -304,4 +308,37 @@ void Processor::spineSmoothEnergy(MatrixXf& A, VectorXf& b) {
             A(i + NUM_CONTROL_POINTS * k, _template->meshInfo.slices(i,2 * NUM_CONTROL_POINTS - 2) + k * size) = 1;
         }
 }
+
+void Processor::fixedPointEnergy(MatrixXf& A, VectorXf& b){
+    int size = _points.cols();
+    A = MatrixXf::Zero( 4 * NUM_CONTROL_POINTS + 4 , _points.size());
+    b = MatrixXf::Zero( 4 * NUM_CONTROL_POINTS + 4, 1);
+
+    for (int i = 0; i< NUM_CONTROL_POINTS; i++) {
+//      Line0 x and y
+        A(i * 4, _template->meshInfo.line0[i]) = 1;
+        A(i * 4 + 1, _template->meshInfo.line0[i] + size) = 1;
+        b[i * 4] = 0.5;
+        b[i * 4 + 1] = 0;
+        
+//      Line1 x and y
+        A(i * 4 + 2, _template->meshInfo.line1[i]) = 1;
+        A(i * 4 + 3, _template->meshInfo.line1[i] + size) = 1;
+        b[i * 4 + 2] = 0;
+        b[i * 4 + 3] = 0.5;
+    }
+    
+//  Line0 z
+    A(4 * NUM_CONTROL_POINTS, _template->meshInfo.line0[0] + 2 * size) = 1;
+    b[4 * NUM_CONTROL_POINTS] = 0;
+    A(4 * NUM_CONTROL_POINTS + 1, _template->meshInfo.line0[NUM_CONTROL_POINTS - 1] + 2 * size) = 1;
+    b[4 * NUM_CONTROL_POINTS + 1] = 1;
+
+//  Line1 z
+    A(4 * NUM_CONTROL_POINTS + 2, _template->meshInfo.line1[0] + 2 * size) = 1;
+    b[4 * NUM_CONTROL_POINTS + 2] = 0;
+    A(4 * NUM_CONTROL_POINTS + 3, _template->meshInfo.line1[NUM_CONTROL_POINTS - 1] + 2 * size) = 1;
+    b[4 * NUM_CONTROL_POINTS + 3] = 1;
+}
+
 

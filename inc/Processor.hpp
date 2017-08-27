@@ -50,6 +50,7 @@ namespace ebib {
         void spineSmoothEnergy(MatrixXf& A, VectorXf& b);
         void laplacianSliceEnergy(MatrixXf& A, VectorXf& b);
         void laplacianLineEnergy(MatrixXf& A, VectorXf& b);
+        void fixedPointEnergy(MatrixXf& A, VectorXf& b);
     };
 }
 
