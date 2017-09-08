@@ -15,8 +15,9 @@
 namespace ebib {
     using namespace Eigen;
     static const int NUM_SAMPLES = 40;
+    static RowVectorXf DUMMY_WEIGHT(0);
     
-    struct Patch{
+    struct Patch {
         MatrixXf points;
         MatrixXi grid;
         MatrixXf vertices;
@@ -27,11 +28,16 @@ namespace ebib {
     class BSplineSurface {
     
     private:
-        float bSplineBasis(float U[], int o, int i, float u, int num_samples, int max_value);
+        Patch* _patch = NULL;
+        float* U = NULL;
+        int k;
+        int numPoints;
+        float bSplineBasis(int i, int o, float u);
     public:
-        BSplineSurface();
+        BSplineSurface(Patch& patch, int noOfPoints, int k);
         ~BSplineSurface();
-        void evaluateSurface(int k, Patch& patch, int noOfPoints, int num_samples);
+        void evaluateSurface();
+        void evaluate(float u, float v, Vector3f& point, RowVectorXf& weight = DUMMY_WEIGHT);
     };
 }
 

@@ -24,6 +24,7 @@ Scene::Scene(GLFWwindow& gWindow){
     gTemplate = new Template(*gProgram);
     userPoints = new UserPoints(*gProgram);
     _processor = new Processor(*gTemplate);
+    _pipeline = new Pipeline(*gTemplate);
     glGenVertexArrays(1, &gVAO);
     glBindVertexArray(gVAO);
 }
@@ -64,6 +65,11 @@ void Scene::process(){
     _processor->updateSearcher();
 }
 
+void Scene::start(){
+    _pipeline->start();
+}
+
+
 void Scene::update(float deltaTime) {
     
     //move position of camera based on WASD keys, and XZ keys for up and down
@@ -88,6 +94,9 @@ void Scene::update(float deltaTime) {
     }
     else if (glfwGetKey(gWindow, 'P')) {
         process();
+    }
+    else if (glfwGetKey(gWindow, 'I')) {
+        start();
     }
     
     //rotate camera based on mouse movement

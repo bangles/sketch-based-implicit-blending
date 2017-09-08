@@ -11,4 +11,5 @@ set(PROJECT_INCLUDE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/Processor.hpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/nnsearch.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/Utils.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Pipeline.h"
         PARENT_SCOPE)

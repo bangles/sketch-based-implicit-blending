@@ -19,6 +19,7 @@
 
 namespace ebib {
     static const int NUM_CONTROL_POINTS = 5;
+    static const int BSPLINE_ORDER = 3;
     
     struct MeshInfo{
         VectorXi line0;
@@ -37,7 +38,7 @@ namespace ebib {
     private:
         GLuint gVBO[5];
         tdogl::Program* gProgram = NULL;
-        BSplineSurface surface;
+        BSplineSurface *surface1, *surface2;
         void renderControlPoints();
         
     public:
@@ -46,6 +47,7 @@ namespace ebib {
         
         Patch mPatches[2];
         MeshInfo meshInfo;
+        void evaluateSingle(float u, float v, Vector3f &point);
         void render();
         void updatePatches();
         void processPoints();

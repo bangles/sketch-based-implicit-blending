@@ -15,6 +15,7 @@
 #include "Template.hpp"
 #include "UserPoints.hpp"
 #include "Processor.hpp"
+#include "Pipeline.hpp"
 
 #include <string>
 #include <stdio.h>
@@ -31,6 +32,7 @@ namespace ebib{
         tdogl::Program* gProgram = NULL;
         tdogl::Camera gCamera;
         Processor* _processor;
+        Pipeline* _pipeline;
         Template* gTemplate = NULL;
         Grid* grid = NULL;
         UserPoints* userPoints = NULL;
@@ -41,6 +43,7 @@ namespace ebib{
         static const glm::vec2 SCREEN_SIZE;
         void render();
         void process();
+        void start();
         void update(float deltaTime);
         void onScroll(double deltaY);
         void cleanUp();

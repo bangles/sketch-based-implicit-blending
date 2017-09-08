@@ -11,4 +11,5 @@ set(PROJECT_SOURCE_LIST
         "${CMAKE_CURRENT_SOURCE_DIR}/UserPoints.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Processor.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Utils.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Pipeline.cpp"
         PARENT_SCOPE)

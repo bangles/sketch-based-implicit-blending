@@ -5,30 +5,52 @@ using namespace ebib;
 
 #define LOG(x) std::cout << x << std::endl
 
-BSplineSurface::BSplineSurface(){
+BSplineSurface::BSplineSurface(Patch& patch, int order, int noOfPoints) {
+    _patch = &patch;
+    k = order;
+    numPoints = noOfPoints;
+    U = new float[noOfPoints + k];
     
+    for (int i = 0; i < noOfPoints + k; i++)
+    {
+        U[i] = 0;
+        if (i < k)
+        {
+            U[i] = 0;
+        }
+        else if (i >= noOfPoints)
+        {
+            U[i] = 1;
+        }
+        else
+        {
+            U[i] = (float)(i - k + 1) / (noOfPoints - k + 1);
+        }
+    }
+    
+    evaluateSurface();
 }
 
 BSplineSurface::~BSplineSurface(){
     
 }
 
-float BSplineSurface::bSplineBasis(float U[], int o, int i, float u, int num_samples, int max_value)
+float BSplineSurface::bSplineBasis(int i, int o, float u)
 {
     float n = 0;
     if (o == 1)
     {
         if (u >= U[i] && u < U[i + 1])
             n = 1;
-        else if (u == U[i+1] && u == max_value)
+        else if (u == U[i+1] && u == 1)
             n = 1;
         else
             n = 0;
     }
     else
     {
-        float n1 = bSplineBasis(U, o - 1, i, u, num_samples,max_value);
-        float n2 = bSplineBasis(U, o - 1, i + 1, u, num_samples,max_value);
+        float n1 = bSplineBasis(i, o - 1, u);
+        float n2 = bSplineBasis(i + 1, o - 1, u);
         
         float nume1 = n1 * (u - U[i]);
         float deno1 = U[i + o - 1] - U[i];
@@ -51,57 +73,40 @@ float BSplineSurface::bSplineBasis(float U[], int o, int i, float u, int num_sam
 }
 
 
-void BSplineSurface::evaluateSurface(int k, Patch& patch, int noOfPoints, int num_samples) {
-    
+void BSplineSurface::evaluateSurface() {
     float x[NUM_SAMPLES] = {};
     
-    float *U = new float[noOfPoints + k];
-    int max_value = noOfPoints - k + 1;
-    
-    for (int i = 0; i < noOfPoints + k; i++)
+    for (int i = 0; i < NUM_SAMPLES; i++)
     {
-        U[i] = 0;
-        if (i < k)
-        {
-            U[i] = 0;
-        }
-        else if (i >= noOfPoints)
-        {
-            U[i] = max_value;
-        }
-        else
-        {
-            U[i] = i - k + 1;
-        }
+        x[i] = (i / (float)(NUM_SAMPLES-1));
     }
     
-    for (int i = 0; i < num_samples; i++)
+    for (int a = 0; a < NUM_SAMPLES; a++)
     {
-        x[i] = (i / (float)(num_samples-1)) * (noOfPoints - k + 1);
-        
-    }
-    
-    patch.vertices.setZero();
-    for (int a = 0; a < num_samples; a++)
-    {
-        for (int b = 0; b < num_samples; b++)
+        for (int b = 0; b < NUM_SAMPLES; b++)
         {
-            RowVectorXf weight(noOfPoints * noOfPoints);
-            for (int i = 0; i < noOfPoints; i++)
-            {
-                Vector3f p2(0,0,0);
-                float basis_2 = bSplineBasis(U, k, i, x[a], num_samples, max_value);
-                for (int j = 0; j < noOfPoints; j++)
-                {
-                    float basis_1 = bSplineBasis(U, k, j, x[b], num_samples, max_value);
-                    p2 += basis_1 * patch.points.col(noOfPoints*i + j);
-                    weight(j * noOfPoints + i) = basis_1 * basis_2;
-                }
-                
-                patch.vertices.col(a * num_samples + b) += basis_2 * p2;
-            }
-            patch.weights.row(a + num_samples * b) = weight;
+            RowVectorXf weight(numPoints * numPoints);
+            Vector3f point(0,0,0);
+            evaluate(x[a], x[b], point, weight);
+            
+            _patch->vertices.col(a * NUM_SAMPLES + b) = point;
+            _patch->weights.row(a + NUM_SAMPLES * b) = weight;
         }
     }
 }
 
+void BSplineSurface::evaluate(float u, float v, Vector3f& point, RowVectorXf& weight){
+    for (int i = 0; i < numPoints; i++)
+    {
+        float basis_1 = bSplineBasis(i, k, v);
+        for (int j = 0; j < numPoints; j++)
+        {
+            float basis_2 = bSplineBasis(j, k, u);
+            if(weight.size() != 0) {
+                weight(j * numPoints + i) = basis_1 * basis_2;
+            }
+            point += basis_1 * basis_2 * _patch->points.col(numPoints * i + j);
+        }
+    }
+    
+}

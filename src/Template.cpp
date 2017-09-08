@@ -57,8 +57,8 @@ Template::Template(tdogl::Program& gProgram){
         for (int j = 0; j < NUM_CONTROL_POINTS; j++)
             mPatches[1].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(j * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f, i * 1.0f / (NUM_CONTROL_POINTS - 1));
     
-    surface.evaluateSurface(3, mPatches[0], NUM_CONTROL_POINTS, NUM_SAMPLES);
-    surface.evaluateSurface(3, mPatches[1], NUM_CONTROL_POINTS, NUM_SAMPLES);
+    surface1 = new BSplineSurface(mPatches[0], BSPLINE_ORDER, NUM_CONTROL_POINTS);
+    surface2 = new BSplineSurface(mPatches[1], BSPLINE_ORDER, NUM_CONTROL_POINTS);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mPatches[0].triangles.size() * sizeof(int), mPatches[0].triangles.data(), GL_STATIC_DRAW);
@@ -67,33 +67,6 @@ Template::Template(tdogl::Program& gProgram){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mPatches[1].triangles.size() * sizeof(int), mPatches[1].triangles.data(), GL_STATIC_DRAW);
     
     processPoints();
-    
-//    LOG("grid0");
-//    LOG(mPatches[0].grid);
-//    
-//    LOG("grid1");
-//    LOG(mPatches[1].grid);
-    
-//    LOG("line0");
-//    LOG(meshInfo.line0);
-//    
-//    LOG("line1");
-//    LOG(meshInfo.line1);
-//    
-//    LOG("line0o");
-//    LOG(meshInfo.line0o);
-//    
-//    LOG("line1o");
-//    LOG(meshInfo.line1o);
-//    
-//    LOG("spine0");
-//    LOG(meshInfo.spine0);
-//    
-//    LOG("spine1");
-//    LOG(meshInfo.spine1);
-    
-//    LOG("slices");
-//    LOG(meshInfo.slices);
 }
 
 
@@ -107,7 +80,6 @@ void Template::render() {
     glBindBuffer(GL_ARRAY_BUFFER, gVBO[0]);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
     
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     gProgram->setUniform("myColor", glm::vec4(0.0f, 1.0f, 0.5f, 0.7f));
@@ -147,8 +119,8 @@ void Template::renderControlPoints() {
 }
 
 void Template::updatePatches() {
-    surface.evaluateSurface(3, mPatches[0], NUM_CONTROL_POINTS, NUM_SAMPLES);
-    surface.evaluateSurface(3, mPatches[1], NUM_CONTROL_POINTS,NUM_SAMPLES);
+    surface1->evaluateSurface();
+    surface2->evaluateSurface();
 }
 
 void Template::processPoints() {
@@ -170,4 +142,9 @@ void Template::processPoints() {
         meshInfo.slices.row(i) <<   mPatches[1].grid.col(i).transpose(), mPatches[0].grid.col(i).transpose();
     }
 }
+
+void Template::evaluateSingle(float u, float v, Vector3f &point) {
+        surface1->evaluate(u, v, point);
+}
+
 
