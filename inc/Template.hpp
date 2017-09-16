@@ -47,7 +47,7 @@ namespace ebib {
         
         Patch mPatches[2];
         MeshInfo meshInfo;
-        void evaluateSingle(float u, float v, Vector3f &point);
+        void evaluate(float u, float v, bool isPatch1, Vector3f &point);
         void render();
         void updatePatches();
         void processPoints();

@@ -143,8 +143,11 @@ void Template::processPoints() {
     }
 }
 
-void Template::evaluateSingle(float u, float v, Vector3f &point) {
+void Template::evaluate(float u, float v, bool isPatch1, Vector3f &point) {
+    if(isPatch1)
         surface1->evaluate(u, v, point);
+    else
+        surface2->evaluate(u, v, point);
 }
 
 

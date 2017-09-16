@@ -19,7 +19,7 @@ UserPoints::UserPoints(tdogl::Program& gProgram){
     float RADIUS = 0.5f;
     
     for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
-        double angle_rad = 0.3 + i * PI/2 / NUM_OF_USER_POINTS / 1.4;
+        double angle_rad = 0.3 + 0.4 * PI * i / NUM_OF_USER_POINTS;
         mUserPoints.col(i) = Vector3f(RADIUS * glm::sin(angle_rad),RADIUS * glm::cos(angle_rad),0.5f);
     }
     
