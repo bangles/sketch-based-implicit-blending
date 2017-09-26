@@ -1,4 +1,3 @@
-//
 //  Pipeline.cpp
 //  ebib_demo
 //
@@ -10,7 +9,6 @@
 
 #define LOG(x) std::cout<<x<<std::endl
 
-using namespace ebib;
 using namespace std;
 
 typedef Triplet<double, int> ETriplet;
@@ -141,7 +139,7 @@ void Pipeline::generateOperator(int S) {
         }
     }
 
-    LOG(gG);
+    print(G);
 }
 
 void Pipeline::solve(MatrixXf &G, MatrixXi &mask, int S, int Sz) {

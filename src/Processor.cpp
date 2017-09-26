@@ -8,8 +8,6 @@
 
 #define LOG(x) std::cout<<x<<std::endl
 
-using namespace ebib;
-
 Processor::Processor(Template &inTemplate){
     _template = &inTemplate;
     updateSearcher();
@@ -61,11 +59,11 @@ void Processor::process(MatrixXf inQueries) {
     int n = inQueries.cols();
     VectorXf w = VectorXf::Zero(7);
     w(0) = 1.0/n;
-    w(1) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Slice smoothness
-    w(2) = glm::max(1000 * glm::pow(0.05f,iter), glm::pow(10, -3)); // Line smoothness
-    w(3) = glm::pow(10, -3); // Tikhonov
-    w(4) = glm::pow(10, 1); // Fixed point energy
-    w(6) = glm::pow(10, -1); // Spine Smoothness
+    w(1) = max(1000 * pow(0.05f,iter), pow(10, -3)); // Slice smoothness
+    w(2) = max(1000 * pow(0.05f,iter), pow(10, -3)); // Line smoothness
+    w(3) = pow(10, -3); // Tikhonov
+    w(4) = pow(10, 1); // Fixed point energy
+    w(6) = pow(10, -1); // Spine Smoothness
     
     w = w.cwiseSqrt();
     

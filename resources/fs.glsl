@@ -1,14 +1,8 @@
-#version 330 core
-
-uniform vec4 myColor;
-
-// Ouput data
-out vec4 color;
+#version 330
+in vec4 vColor;
+out vec4 fColor;
 
 void main()
 {
-    
-    // Output color = red
-    color = myColor;
-    
+   fColor = vColor;
 }

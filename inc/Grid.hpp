@@ -1,34 +1,26 @@
-//
-//  Grid.hpp
-//  ebib_demo
-//
-//  Created by Ishmeet Singh Kohli on 11/07/17.
-//
-//
-
 #ifndef Grid_hpp
 #define Grid_hpp
 
 #include<vector>
-#include <GL/glew.h>
-#include <glm/glm.hpp>
+#include <Eigen/Dense>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLShaderProgram>
 
-#include "Program.h"
+using namespace Eigen;
 
-namespace ebib {
-    
-    class Grid {
-    private:
-        GLuint gVBO;
-        std::vector<glm::vec3> vertices;
-        tdogl::Program* gProgram = NULL;
-        
-    public:
-        Grid(int numIndices, tdogl::Program& gProgram);
-        ~Grid();
-        void renderGrid();
-    };
-    
-}
+class Grid {
+private:
+    std::vector<QVector3D> vertices;
+    QOpenGLBuffer m_vbo;
+    QOpenGLVertexArrayObject m_vao;
+    QOpenGLShaderProgram* m_program;
+
+public:
+    Grid(int numIndices, QOpenGLShaderProgram *program);
+    ~Grid();
+    void render();
+};
+
 
 #endif /* Grid_hpp */

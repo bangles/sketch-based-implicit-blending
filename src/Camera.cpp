@@ -3,8 +3,6 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace tdogl;
-
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
 
 Camera::Camera() :

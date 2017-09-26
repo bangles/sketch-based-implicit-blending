@@ -1,14 +1,13 @@
-#version 150
+#version 330
+layout(location = 0) in vec3 position;
+out vec4 vColor;
 
+uniform vec4 color;
 uniform mat4 camera;
 uniform mat4 model;
 
-in vec3 vert;
-
-
-
-void main() {
-    // Pass the tex coord straight through to the fragment shader    
-    // Apply all matrix transformations to vert
-    gl_Position = camera * model * vec4(vert, 1);
+void main()
+{
+  gl_Position = camera * model * vec4(position, 1.0);
+  vColor = color;
 }

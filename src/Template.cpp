@@ -1,20 +1,15 @@
-//
 //  Template.cpp
 //  ebib_demo
 //
 //  Created by Ishmeet Singh Kohli on 12/07/17.
-//
 
 #include "Template.hpp"
 #include <iostream>
 
 #define LOG(x) std::cout<<x<<std::endl
 
-using namespace ebib;
-
-Template::Template(tdogl::Program& gProgram){
-    this->gProgram = &gProgram;
-    glGenBuffers(5, gVBO);
+Template::Template(QOpenGLShaderProgram *program) : index_vbo(QOpenGLBuffer::IndexBuffer){
+    this->m_program = program;
     
     mPatches[0].points = MatrixXf(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
     mPatches[0].vertices = MatrixXf(3,NUM_SAMPLES * NUM_SAMPLES);
@@ -60,67 +55,32 @@ Template::Template(tdogl::Program& gProgram){
     surface1 = new BSplineSurface(mPatches[0], BSPLINE_ORDER, NUM_CONTROL_POINTS);
     surface2 = new BSplineSurface(mPatches[1], BSPLINE_ORDER, NUM_CONTROL_POINTS);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mPatches[0].triangles.size() * sizeof(int), mPatches[0].triangles.data(), GL_STATIC_DRAW);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[2]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mPatches[1].triangles.size() * sizeof(int), mPatches[1].triangles.data(), GL_STATIC_DRAW);
-    
     processPoints();
+    initializeBuffers();
+    updateBuffers();
 }
-
-
 
 void Template::render() {
-    MatrixXf vertices(3, NUM_SAMPLES * NUM_SAMPLES * 2);
-    
-    vertices << mPatches[0].vertices,
-                mPatches[1].vertices;
-    
-    glBindBuffer(GL_ARRAY_BUFFER, gVBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    gProgram->setUniform("myColor", glm::vec4(0.0f, 1.0f, 0.5f, 0.7f));
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
-    glDrawElements(GL_TRIANGLES, mPatches[0].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[2]);
-    glDrawElements(GL_TRIANGLES, mPatches[1].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
-    
-//    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-//    gProgram->setUniform("myColor", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-//    
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[1]);
-//    glDrawElements(GL_TRIANGLES, mPatches[0].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
-//    
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gVBO[2]);
-//    glDrawElements(GL_TRIANGLES, mPatches[1].triangles.size() * 3, GL_UNSIGNED_INT, (void*)0);
- 
-    renderControlPoints();
-}
+    m_vao[0].bind();
+    m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 0.7f));
 
-void Template::renderControlPoints() {
-    glBindBuffer(GL_ARRAY_BUFFER, gVBO[3]);
-    glBufferData(GL_ARRAY_BUFFER, mPatches[0].points.size() * sizeof(GLfloat), mPatches[0].points.data(), GL_STATIC_DRAW);
-    
-    gProgram->setUniform("myColor", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    index_vbo.bind();
+    glDrawElements(GL_TRIANGLES, mPatches[1].triangles.size() * 6, GL_UNSIGNED_INT, 0);
+
+    m_vao[1].bind();
+    m_program->setUniformValue("color", QVector4D(1.0f, 0.0f, 1.0f, 1.0f));
     glDrawArrays(GL_POINTS, 0, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, gVBO[4]);
-    glBufferData(GL_ARRAY_BUFFER, mPatches[1].points.size() * sizeof(GLfloat), mPatches[1].points.data(), GL_STATIC_DRAW);
 
-    gProgram->setUniform("myColor", glm::vec4(1.0f, 0.6f, 0.0f, 1.0f));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    m_vao[2].bind();
+    m_program->setUniformValue("color", QVector4D(1.0f, 0.6f, 0.0f, 1.0f));
     glDrawArrays(GL_POINTS, 0, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
 }
+
 
 void Template::updatePatches() {
     surface1->evaluateSurface();
     surface2->evaluateSurface();
+    updateBuffers();
 }
 
 void Template::processPoints() {
@@ -148,6 +108,55 @@ void Template::evaluate(float u, float v, bool isPatch1, Vector3f &point) {
         surface1->evaluate(u, v, point);
     else
         surface2->evaluate(u, v, point);
+}
+
+void Template::initializeBuffers(){
+    m_vbo[0].create(); m_vbo[1].create(); m_vbo[2].create();
+    m_vao[0].create(); m_vao[1].create(); m_vao[2].create();
+    index_vbo.create();
+}
+
+void Template::updateBuffers() {
+    MatrixXf vertices(3, NUM_SAMPLES * NUM_SAMPLES * 2);
+    vertices << mPatches[0].vertices, mPatches[1].vertices;
+
+    MatrixXi triangles(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 4);
+    triangles << mPatches[0].triangles, mPatches[1].triangles;
+
+//  Patches
+    m_vbo[0].bind();
+    m_vbo[0].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vbo[0].allocate(vertices.data(), vertices.size() * sizeof(float));
+    m_vao[0].bind();
+    m_program->enableAttributeArray(0);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+    m_vbo[0].release();
+    m_vao[0].release();
+
+    index_vbo.bind();
+    index_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    index_vbo.allocate(triangles.data(), triangles.size() * sizeof(GLuint));
+    index_vbo.release();
+
+//  Points 1
+    m_vbo[1].bind();
+    m_vbo[1].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vbo[1].allocate(mPatches[0].points.data(), mPatches[0].points.size() * sizeof(GLfloat));
+    m_vao[1].bind();
+    m_program->enableAttributeArray(0);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+    m_vao[1].release();
+    m_vbo[1].release();
+
+//  Points 1
+    m_vbo[2].bind();
+    m_vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vbo[2].allocate(mPatches[1].points.data(), mPatches[1].points.size() * sizeof(GLfloat));
+    m_vao[2].bind();
+    m_program->enableAttributeArray(0);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+    m_vao[2].release();
+    m_vbo[2].release();
 }
 
 

@@ -1,8 +1,6 @@
 #include "BSplineSurface.hpp"
 #include <iostream>
 
-using namespace ebib;
-
 #define LOG(x) std::cout << x << std::endl
 
 BSplineSurface::BSplineSurface(Patch& patch, int order, int noOfPoints) {
