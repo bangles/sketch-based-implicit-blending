@@ -1,7 +1,5 @@
 build/
 build_xcode/
 
-*.cproject
-*.project
-*.settings
+*.user
 *.DS_Store
