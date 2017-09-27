@@ -24,7 +24,9 @@ class MyGLWidget : public QOpenGLWidget,
 {
     Q_OBJECT
 public:
+    Pipeline *m_pipeline;
     ObjectScene *objectScene;
+    TemplateScene *templateScene;
     MyGLWidget(QWidget *parent = 0);
     ~MyGLWidget();
     void initializeGL();
@@ -46,7 +48,6 @@ protected:
 private:
     int state = 0;
     QOpenGLShaderProgram m_program;
-    TemplateScene *templateScene;
     void printContextInformation();
 };
 

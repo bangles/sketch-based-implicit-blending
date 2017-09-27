@@ -10,10 +10,11 @@ HEADERS +=  \
     $$PWD/Utils.h \
     $$PWD/Pipeline.hpp \
     $$PWD/UserPoints.hpp \
-    $$PWD/Processor.hpp \
     $$PWD/nnsearch.h \
     $$PWD/input.h \
     $$PWD/circle.h \
     $$PWD/ObjectScene.hpp \
     $$PWD/MarchingSquares.h \
-    $$PWD/TemplateScene.hpp
+    $$PWD/TemplateScene.hpp \
+    $$PWD/RegistrationProcessor.hpp \
+    $$PWD/OperatorGenerator.h

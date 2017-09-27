@@ -9,7 +9,8 @@
 #ifndef Pipeline_h
 #define Pipeline_h
 
-#include "Processor.hpp"
+#include "RegistrationProcessor.hpp"
+#include "OperatorGenerator.h"
 #include <igl/floor.h>
 #include <vector>
 #include <algorithm>
@@ -18,22 +19,15 @@
 
 class Pipeline {
 private:
-    Template* _template = NULL;
+    RegistrationProcessor *m_regProcessor;
+    OperatorGenerator *m_opGenerator;
 
 public:
-    Pipeline(Template &inTemplate);
+    Pipeline(QOpenGLShaderProgram *program);
     ~Pipeline();
+    Template* m_template;
 
-    void start();
-    void generateOperator(int S);
-    VectorXf findVs(int res);
-    void fillGrid(int S, int Sz, int sampleCount, int Nfactor, MatrixXf X, MatrixXf Y, VectorXf V,vector<MatrixXf> &G, vector<MatrixXi> &mask, vector<MatrixXi> &Gs);
-    void fillSlice(int S, int sampleCount, int Nfactor, MatrixXf X, MatrixXf Y, float v, MatrixXf &out_G, MatrixXi &out_mask, MatrixXi &out_Gs);
-    void solve(MatrixXf &G, MatrixXi &mask, int S, int Sz);
-    void print(MatrixXf matrix);
-    void print(MatrixXi matrix);
-    void print(vector<MatrixXf> matrix);
-    void print(vector<MatrixXi> matrix);
+    void start(MatrixXf userSamples);
 };
 
 

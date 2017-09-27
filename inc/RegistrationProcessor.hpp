@@ -6,8 +6,8 @@
 //
 //
 
-#ifndef Processor_h
-#define Processor_h
+#ifndef RegistrationProcessor_h
+#define RegistrationProcessor_h
 
 #include "nnsearch.h"
 #include "Template.hpp"
@@ -21,11 +21,11 @@
 
 using namespace Eigen;
 
-class Processor
+class RegistrationProcessor
 {
 
 private:
-    Template* _template = NULL;
+    Template* m_template;
     MatrixXf _points;
     MatrixXf _vertices;
     MatrixXi _triangles;
@@ -35,9 +35,9 @@ private:
     TrimeshSearcher<MatrixXf,MatrixXi>* searcher;
 
 public:
-    Processor(Template &inTemplate);
-    ~Processor();
-    void process(MatrixXf inQueries);
+    RegistrationProcessor(Template *inTemplate);
+    ~RegistrationProcessor();
+    void registerPoints(MatrixXf inQueries);
     void push(MatrixXi& MC, int& lastRow, VectorXi a, VectorXi b);
     void push(MatrixXi& MC, int& lastRow, int a, int b);
     std::vector<VectorXi> convertToArray(MatrixXi& MC, VectorXi& IX);
@@ -52,4 +52,4 @@ public:
     void fixedPointEnergy(MatrixXf& A, VectorXf& b);
 };
 
-#endif /* Processor_h */
+#endif /* RegistrationProcessor_h */

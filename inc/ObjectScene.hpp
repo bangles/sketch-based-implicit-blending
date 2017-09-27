@@ -5,6 +5,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
+#include <Pipeline.hpp>
 #include <circle.h>
 #include <math.h>
 
@@ -15,6 +16,7 @@ private:
   bool isBlended;
 
   QOpenGLShaderProgram *m_program;
+  Pipeline *m_pipeline;
   Circle *circle1, *circle2;
   MatrixXf boundary;
   MatrixXf samples;
@@ -23,7 +25,7 @@ private:
   QOpenGLVertexArrayObject m_vao[4];
 
 public:
-  ObjectScene(QOpenGLShaderProgram *program);
+  ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
   ~ObjectScene();
   void render();
   void blend();

@@ -34,8 +34,9 @@ void MyGLWidget::initializeGL()
     m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");
     m_program.link();
 
-    templateScene = new TemplateScene(&m_program);
-    objectScene = new ObjectScene(&m_program);
+    m_pipeline = new Pipeline(&m_program);
+    templateScene = new TemplateScene(&m_program, m_pipeline);
+    objectScene = new ObjectScene(&m_program, m_pipeline);
 }
 
 void MyGLWidget::resizeGL(int width, int height)

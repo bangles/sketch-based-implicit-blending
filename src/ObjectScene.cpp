@@ -1,9 +1,10 @@
 #include "ObjectScene.hpp"
 
-ObjectScene::ObjectScene(QOpenGLShaderProgram *program)
+ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline)
 /*: index_vbo{QOpenGLBuffer(QOpenGLBuffer::IndexBuffer),
                 QOpenGLBuffer(QOpenGLBuffer::IndexBuffer)}*/ {
   this->m_program = program;
+  this->m_pipeline = pipeline;
   int S = 100;
 
   Vector2i min(-1, -1);
@@ -44,21 +45,21 @@ void ObjectScene::initializeSamples() {
   m_vao[3].release();
 }
 
-void ObjectScene::initializeBoundary(){
-    boundary.resize(2, 4);
-    boundary.col(0) << -0.99, -0.99;
-    boundary.col(1) << 0.99, -0.99;
-    boundary.col(2) << 0.99, 0.99;
-    boundary.col(3) << -0.99, 0.99;
+void ObjectScene::initializeBoundary() {
+  boundary.resize(2, 4);
+  boundary.col(0) << -0.99, -0.99;
+  boundary.col(1) << 0.99, -0.99;
+  boundary.col(2) << 0.99, 0.99;
+  boundary.col(3) << -0.99, 0.99;
 
-    m_vbo[2].bind();
-    m_vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo[2].allocate(boundary.data(), boundary.size() * sizeof(GL_FLOAT));
-    m_vao[2].bind();
-    m_program->enableAttributeArray(0);
-    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
-    m_vbo[2].release();
-    m_vao[2].release();
+  m_vbo[2].bind();
+  m_vbo[2].setUsagePattern(QOpenGLBuffer::StaticDraw);
+  m_vbo[2].allocate(boundary.data(), boundary.size() * sizeof(GL_FLOAT));
+  m_vao[2].bind();
+  m_program->enableAttributeArray(0);
+  m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+  m_vbo[2].release();
+  m_vao[2].release();
 }
 
 void ObjectScene::render() {
@@ -85,7 +86,7 @@ void ObjectScene::render() {
 
   m_vao[3].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
-//  glDrawArrays(GL_LINE_STRIP, 0, samples.cols());
+  //  glDrawArrays(GL_LINE_STRIP, 0, samples.cols());
   glDrawArrays(GL_POINTS, 0, samples.cols());
 }
 
