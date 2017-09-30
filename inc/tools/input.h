@@ -42,7 +42,7 @@ private:
     static void registerMousePress(Qt::MouseButton button);
     static void registerMouseRelease(Qt::MouseButton button);
     static void reset();
-    friend class MyGLWidget;
+    friend class GLWidget;
 };
 
 inline bool Input::keyTriggered(Qt::Key key)

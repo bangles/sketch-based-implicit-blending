@@ -26,8 +26,10 @@ private:
 public:
     UserPoints(QOpenGLShaderProgram *program);
     ~UserPoints();
-    MatrixXf mUserPoints;
+    MatrixXf m_userPoints;
     void render();
+    void bindPoints();
+    void setUserPoints(MatrixXf userPoints);
 };
 
 #endif /* UserPoints_hpp */

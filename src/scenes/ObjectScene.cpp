@@ -5,19 +5,6 @@ ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline)
                 QOpenGLBuffer(QOpenGLBuffer::IndexBuffer)}*/ {
   this->m_program = program;
   this->m_pipeline = pipeline;
-  int S = 100;
-
-  Vector2i min(-1, -1);
-  Vector2i max(1, 1);
-
-  MatrixXf X = RowVectorXf::LinSpaced(S, min[0], max[0]).replicate(S, 1);
-  MatrixXf Y = VectorXf::LinSpaced(S, min[1], max[1]).replicate(1, S);
-
-  //  circle1 = new Circle(-0.35, 0, 0.25, 0.6, X, Y);
-  //  circle2 = new Circle(0.35, 0, 0.25, 0.6, X, Y);
-
-  circle1 = new Circle(0, -0.35, 0.25, 0.6, X, Y);
-  circle2 = new Circle(0, 0.35, 0.25, 0.6, X, Y);
 
   initializeBuffers();
   initializeBoundary();
@@ -27,13 +14,13 @@ ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline)
 
 void ObjectScene::initializeSamples() {
   int n = 300;
-  Vector2f p1 = circle2->center;
-  p1[0] -= circle2->r1;
-  Vector2f p2 = circle1->center;
-  p2[0] -= circle1->r1;
+  Vector2f p1 = m_pipeline->circle2->center;
+  p1[0] -= m_pipeline->circle2->r1;
+  Vector2f p2 = m_pipeline->circle1->center;
+  p2[0] -= m_pipeline->circle1->r1;
 
   samples.resize(2, n * 2);
-  samples << interpolatePoints(p1, p2, 300), interpolateArc(circle1->center, circle1->r1, M_PI, 2 * M_PI, n);
+  samples << interpolatePoints(p1, p2, 300), interpolateArc(m_pipeline->circle1->center, m_pipeline->circle1->r1, M_PI, 2 * M_PI, n);
 
   m_vbo[3].bind();
   m_vbo[3].setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -67,7 +54,7 @@ void ObjectScene::render() {
   m_program->setUniformValue("camera", QMatrix4x4());
   m_vao[0].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));
-  glDrawArrays(GL_TRIANGLES, 0, circle1->triangles.size());
+  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle1->triangles.size());
 
   //  index_vbo[0].bind();
   //  glDrawElements(GL_TRIANGLES, circle1->faces.size() * 6, GL_UNSIGNED_INT, 0);
@@ -75,7 +62,7 @@ void ObjectScene::render() {
   if (!isBlended) {
     m_vao[1].bind();
     m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
-    glDrawArrays(GL_TRIANGLES, 0, circle2->triangles.size());
+    glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle2->triangles.size());
     //    index_vbo[1].bind();
     //    glDrawElements(GL_TRIANGLES, circle2->faces.size() * 6, GL_UNSIGNED_INT, 0);
   }
@@ -109,8 +96,8 @@ void ObjectScene::initializeBuffers() {
 }
 
 void ObjectScene::updateBuffers() {
-  bindObject(0, circle1);
-  bindObject(1, circle2);
+  bindObject(0, m_pipeline->circle1);
+  bindObject(1, m_pipeline->circle2);
 }
 
 void ObjectScene::bindObject(int i, Circle *circle) {
@@ -138,8 +125,8 @@ void ObjectScene::bindObject(int i, Circle *circle) {
 
 void ObjectScene::blend() {
   isBlended = true;
-  circle1->blend(circle2);
-  bindObject(0, circle1);
+  m_pipeline->circle1->blend(m_pipeline->circle2);
+  bindObject(0, m_pipeline->circle1);
 }
 
 MatrixXf ObjectScene::interpolatePoints(Vector2f p1, Vector2f p2, int samples) {

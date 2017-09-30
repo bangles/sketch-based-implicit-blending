@@ -1,8 +1,6 @@
-#ifndef TemplateScene_hpp
-#define TemplateScene_hpp
+#ifndef SynthesisScene_hpp
+#define SynthesisScene_hpp
 
-
-#include "Grid.hpp"
 #include "Pipeline.hpp"
 #include "Camera.h"
 #include <Eigen/Dense>
@@ -16,15 +14,14 @@
 
 using namespace Eigen;
 
-class TemplateScene {
+class SynthesisScene {
 private:
     Camera m_camera;
     QOpenGLShaderProgram *m_program;
     Pipeline *m_pipeline;
-    Grid* grid = NULL;
 public:
-    TemplateScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
-    ~TemplateScene();
+    SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
+    ~SynthesisScene();
     //        static const glm::vec2 SCREEN_SIZE;
     void render();
     void update();
@@ -32,4 +29,4 @@ public:
     void setViewportAspectRatio(float aspectRatio);
 };
 
-#endif /* TemplateScene_hpp */
+#endif /* SynthesisScene_hpp */

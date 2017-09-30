@@ -1,37 +1,26 @@
-#include "TemplateScene.hpp"
+#include "SynthesisScene.hpp"
 #include <iostream>
 
 #define LOG(x) std::cout << x << std::endl
 
-TemplateScene::TemplateScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
+SynthesisScene::SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
   this->m_program = program;
   this->m_pipeline = pipeline;
-  grid = new Grid(3 * 44, m_program);
   m_camera.setPosition(glm::vec3(0, 0.5, 3));
 }
 
-TemplateScene::~TemplateScene() {}
+SynthesisScene::~SynthesisScene() {}
 
-void TemplateScene::render() {
+void SynthesisScene::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
-  grid->render();
-  m_pipeline->m_template->render();
-  m_pipeline->userPoints->render();
-  //    drawTestPoints(gTemplate->mPatch1.points);
+
+  if (m_pipeline->result->isSet) {
+    m_pipeline->result->render();
+  }
 }
 
-// void TemplateScene::process(){
-//    m_processor->process(userPoints->mUserPoints);
-//    m_template->updatePatches();
-//    m_processor->updateSearcher();
-//}
-
-// void TemplateScene::start(){
-//    m_pipeline->start();
-//}
-
-void TemplateScene::update() {
+void SynthesisScene::update() {
   // Camera Transformation
   if (Input::keyPressed(Qt::Key_Shift)) {
     m_camera.offsetOrientation(mouseSensitivity * Input::mouseDelta().y(), mouseSensitivity * (float)Input::mouseDelta().x());
@@ -58,14 +47,14 @@ void TemplateScene::update() {
   if (Input::keyPressed(Qt::Key_X)) {
     m_camera.offsetPosition(moveSpeed * glm::vec3(0, 1, 0));
   }
-//  if (Input::keyPressed(Qt::Key_P)) {
-//    process();
-//  }
-//  if (Input::keyPressed(Qt::Key_I)) {
-//    start();
-//  }
+  //  if (Input::keyPressed(Qt::Key_P)) {
+  //    process();
+  //  }
+  //  if (Input::keyPressed(Qt::Key_I)) {
+  //    start();
+  //  }
 }
 
-void TemplateScene::cleanUp() {}
+void SynthesisScene::cleanUp() {}
 
-void TemplateScene::setViewportAspectRatio(float aspectRatio) { m_camera.setViewportAspectRatio(aspectRatio); }
+void SynthesisScene::setViewportAspectRatio(float aspectRatio) { m_camera.setViewportAspectRatio(aspectRatio); }

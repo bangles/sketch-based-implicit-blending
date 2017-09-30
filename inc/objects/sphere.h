@@ -1,5 +1,5 @@
-#ifndef CIRCLE_H
-#define CIRCLE_H
+#ifndef Sphere_H
+#define Sphere_H
 
 #include <Eigen/Dense>
 #include <MarchingSquares.h>
@@ -9,15 +9,16 @@
 
 using namespace Eigen;
 
-class Circle {
+class Sphere {
 
 private:
   MatrixXf m_X;
   MatrixXf m_Y;
+  MatrixXf m_Z;
 
 public:
   MatrixXf distanceField;
-  Vector2f center;
+  Vector3f center;
   float r1, r2;
   MatrixXf gradient[2];
   //  MatrixXf vertices;
@@ -25,11 +26,11 @@ public:
 
   std::vector<Vector2d> line_segments, triangles;
 
-  Circle(float x1, float y1, float in_r1, float in_r2, MatrixXf &X, MatrixXf &Y);
-  void calculateDistanceField(MatrixXf &X, MatrixXf &Y, MatrixXf &df, MatrixXf (&g)[2]);
+  Sphere(float x1, float y1, float z1, float in_r1, float in_r2, MatrixXf &X, MatrixXf &Y, MatrixXf &Z);
+  void calculateDistanceField(MatrixXf &X, MatrixXf &Y, MatrixXf &Z, MatrixXf &df, MatrixXf (&g)[2]);
   void calculateDistanceToField(MatrixXf &df);
   void polygonize(float isoValue);
-  void blend(Circle *circle);
+  void blend(Sphere *sphere);
 };
 
-#endif // CIRCLE_H
+#endif // Sphere_H

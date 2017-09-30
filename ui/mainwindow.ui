@@ -10,34 +10,58 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="MyGLWidget" name="widget" native="true">
+     <widget class="GLWidget" name="glwidget" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>776</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+      </widget>
+      <zorder>widget</zorder>
+      <zorder>widget</zorder>
+      <zorder></zorder>
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="5" column="0">
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>Close</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -50,27 +74,31 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="text">
-         <string>Template Scene</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item>
        <widget class="QPushButton" name="pushButton_2">
         <property name="text">
-         <string>Sphere Scene</string>
+         <string>Map</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_4">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
+      <item>
+       <widget class="QPushButton" name="pushButton_5">
         <property name="text">
-         <string>blend</string>
+         <string>Register</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="text">
+         <string>Generate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Close</string>
         </property>
        </widget>
       </item>
@@ -81,9 +109,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MyGLWidget</class>
+   <class>GLWidget</class>
    <extends>QWidget</extends>
-   <header>MyGLWidget.h</header>
+   <header>GLWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

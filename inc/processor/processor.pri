@@ -4,4 +4,5 @@ DEPENDPATH += $$PWD
 HEADERS +=  \
     $$PWD/Pipeline.hpp \
     $$PWD/RegistrationProcessor.hpp \
-    $$PWD/OperatorGenerator.h
+    $$PWD/OperatorGenerator.h \
+    $$PWD/VolumeGenerator.h

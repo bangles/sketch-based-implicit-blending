@@ -14,17 +14,16 @@ using namespace Eigen;
 class ObjectScene {
 private:
   bool isBlended;
-
   QOpenGLShaderProgram *m_program;
   Pipeline *m_pipeline;
-  Circle *circle1, *circle2;
   MatrixXf boundary;
-  MatrixXf samples;
   //    QOpenGLBuffer index_vbo[2];
   QOpenGLBuffer m_vbo[4];
   QOpenGLVertexArrayObject m_vao[4];
 
 public:
+  MatrixXf samples;
+
   ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
   ~ObjectScene();
   void render();
@@ -35,7 +34,6 @@ public:
   void initializeBuffers();
   void updateBuffers();
   void initializeSamples();
-  void convertSamples();
   void initializeBoundary();
   void bindObject(int i, Circle *circle);
   MatrixXf interpolatePoints(Vector2f p1, Vector2f p2, int samples);

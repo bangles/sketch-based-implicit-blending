@@ -5,4 +5,6 @@ SOURCES +=  \
     $$PWD/BSplineSurface.cpp \
     $$PWD/Template.cpp \
     $$PWD/UserPoints.cpp \
-    $$PWD/circle.cpp
+    $$PWD/circle.cpp \
+    $$PWD/Result.cpp \
+    $$PWD/sphere.cpp

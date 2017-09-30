@@ -397,8 +397,6 @@ void genGeometry(const GridCell& gridCell, std::vector<Eigen::Vector2d > &line_s
 
 void marchingSquares(const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y, const Eigen::MatrixXf &S, double isoValue, std::vector<Eigen::Vector2d> &line_segments, std::vector<Eigen::Vector2d>& triangles)
 {
-//    const Eigen::PlainObjectBase<DerivedV1> &values,
-//    const Eigen::PlainObjectBase<DerivedV2> &points
         for (int x = 0; x < X.rows() - 1; x++) {
             for (int y = 0; y < Y.rows() - 1; y++) {
                 GridCell gc;

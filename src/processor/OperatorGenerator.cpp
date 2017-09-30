@@ -6,14 +6,14 @@ OperatorGenerator::OperatorGenerator(Template* in_template) {
     m_template = in_template;
 }
 
-void OperatorGenerator::generateOperator(int S) {
+vector<MatrixXf> OperatorGenerator::generateOperator(int S) {
     MatrixXf X = RowVectorXf::LinSpaced(S,0,1).replicate(S,1);
     MatrixXf Y = VectorXf::LinSpaced(S,0,1).replicate(1,S);
 
     int Sz = S;
     VectorXf V = findVs(S);
 
-    int sampleCount = 501;
+    int sampleCount = 51;
     vector<MatrixXf> G, G1(Sz), G2(Sz);
     vector<MatrixXi> mask, mask1(Sz), mask2(Sz);
     vector<MatrixXi> Gs, Gs1(Sz), Gs2(Sz);
@@ -123,7 +123,9 @@ void OperatorGenerator::generateOperator(int S) {
         }
     }
 
-    print(G);
+//    print(G);
+
+    return G;
 }
 
 void OperatorGenerator::solve(MatrixXf &G, MatrixXi &mask, int S, int Sz) {
@@ -134,6 +136,8 @@ void OperatorGenerator::solve(MatrixXf &G, MatrixXi &mask, int S, int Sz) {
     VectorXd b(S * S);
     VectorXd x(S * S);
     vector<ETriplet> tripletList;
+
+    tripletList.reserve(S * S *13);
 
     for (int i = 0; i < S; i++) {
         for (int j = 0; j < S; j++)
