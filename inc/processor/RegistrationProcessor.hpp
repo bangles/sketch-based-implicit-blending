@@ -30,7 +30,14 @@ private:
     MatrixXf _vertices;
     MatrixXi _triangles;
     MatrixXf _weights;
+    MatrixXf zeroWeights;
     int iter;
+
+    MatrixXf A0, A1, A2, A3, A4, A6;
+    VectorXf b0, b1, b2, b3, b4, b6;
+
+    MatrixXi MC;
+    MatrixXf R;
 
     TrimeshSearcher<MatrixXf,MatrixXi>* searcher;
 
@@ -51,6 +58,7 @@ public:
     void laplacianSliceEnergy(MatrixXf& A, VectorXf& b);
     void laplacianLineEnergy(MatrixXf& A, VectorXf& b);
     void fixedPointEnergy(MatrixXf& A, VectorXf& b);
+    void initialize();
 };
 
 #endif /* RegistrationProcessor_h */

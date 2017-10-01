@@ -10,62 +10,61 @@
 
 RegistrationProcessor::RegistrationProcessor(Template *inTemplate) {
   m_template = inTemplate;
-  updateSearcher();
   iter = 0;
+
+  _points.resize(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
+  _vertices.resize(m_template->mPatches[0].vertices.rows(), m_template->mPatches[0].vertices.cols() * 2);
+  _triangles.resize(m_template->mPatches[0].triangles.rows(), m_template->mPatches[0].triangles.cols() * 2);
+  _triangles << m_template->mPatches[0].triangles, m_template->mPatches[1].triangles;
+  _weights.resize(m_template->mPatches[0].weights.rows() * 2, m_template->mPatches[0].weights.cols() * 2);
+  zeroWeights = MatrixXf::Zero(m_template->mPatches[0].weights.rows(), m_template->mPatches[0].weights.cols());
+  updateSearcher();
+
+  initialize();
+}
+
+void RegistrationProcessor::initialize(){
+    MC = mergedDOFs();
+    R = MatrixXf::Identity(_points.size(), _points.size());
+
+    if (MC.size() != 0) {
+      for (int i = 0; i < MC.rows(); i++) {
+        R(MC(i, 1), MC(i, 0)) = 1;
+      }
+
+      removeColumns(R, MC.col(1));
+    }
+
+    laplacianSliceEnergy(A1, b1);
+    laplacianLineEnergy(A2, b2);
+    fixedPointEnergy(A4, b4);
+    spineSmoothEnergy(A6, b6);
 }
 
 void RegistrationProcessor::updateSearcher() {
-  _points.resize(3, NUM_CONTROL_POINTS * NUM_CONTROL_POINTS * 2);
   _points << m_template->mPatches[0].points, m_template->mPatches[1].points;
-
-  _vertices.resize(m_template->mPatches[0].vertices.rows(), m_template->mPatches[0].vertices.cols() * 2);
   _vertices << m_template->mPatches[0].vertices, m_template->mPatches[1].vertices;
-
-  _triangles.resize(m_template->mPatches[0].triangles.rows(), m_template->mPatches[0].triangles.cols() * 2);
-  _triangles << m_template->mPatches[0].triangles, m_template->mPatches[1].triangles;
-
-  _weights.resize(m_template->mPatches[0].weights.rows() * 2, m_template->mPatches[0].weights.cols() * 2);
-  MatrixXf zeroWeights = MatrixXf::Zero(m_template->mPatches[0].weights.rows(), m_template->mPatches[0].weights.cols());
   _weights << m_template->mPatches[0].weights, zeroWeights, zeroWeights, m_template->mPatches[1].weights;
-
   searcher = new TrimeshSearcher<MatrixXf, MatrixXi>();
   searcher->build(_vertices, _triangles);
 }
 
 void RegistrationProcessor::registerPoints(MatrixXf inQueries) {
-//  while (iter < 10) {
-    MatrixXf x = step(inQueries);
-    Map<Matrix<float, Dynamic, Dynamic, RowMajor>> solution(x.data(), 3, x.size() / 3);
+  //  while (iter < 10) {
+  MatrixXf x = step(inQueries);
+  Map<Matrix<float, Dynamic, Dynamic, RowMajor>> solution(x.data(), 3, x.size() / 3);
 
-    m_template->mPatches[0].points = solution.leftCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
-    m_template->mPatches[1].points = solution.rightCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
-    updateSearcher();
-    iter++;
-//  }
-//  iter = 0;
+  m_template->mPatches[0].points = solution.leftCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
+  m_template->mPatches[1].points = solution.rightCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
+  updateSearcher();
+  iter++;
+  //  }
+  //  iter = 0;
 }
 
 MatrixXf RegistrationProcessor::step(MatrixXf inQueries) {
-  MatrixXf A0, A1, A2, A3, A4, A6;
-  VectorXf b0, b1, b2, b3, b4, b6;
-
-  MatrixXi MC = mergedDOFs();
-  MatrixXf R = MatrixXf::Identity(_points.size(), _points.size());
-
-  if (MC.size() != 0) {
-    for (int i = 0; i < MC.rows(); i++) {
-      R(MC(i, 1), MC(i, 0)) = 1;
-    }
-
-    removeColumns(R, MC.col(1));
-  }
-
   pointToPlaneEnergy(A0, b0, inQueries);
-  laplacianSliceEnergy(A1, b1);
-  laplacianLineEnergy(A2, b2);
   tikhonovEnergy(A3, b3);
-  fixedPointEnergy(A4, b4);
-  spineSmoothEnergy(A6, b6);
 
   int n = inQueries.cols();
   VectorXf w = VectorXf::Zero(7);

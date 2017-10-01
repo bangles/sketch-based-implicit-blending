@@ -7,7 +7,7 @@ SynthesisScene::SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline
   this->m_program = program;
   this->m_pipeline = pipeline;
 //  grid = new Grid(3 * 44, m_program);
-  m_camera.setPosition(glm::vec3(0, 0.5, 3));
+  m_camera.setPosition(glm::vec3(0, 0, 2));
 }
 
 SynthesisScene::~SynthesisScene() {}

@@ -20,6 +20,7 @@ public:
   static bool writeMatrixXiToCSVfile(string name, MatrixXi &matrix);
   static bool writeMatrixXfToCSVfile(string name, MatrixXf &matrix);
   static MatrixXf slice(Tensor<float, 3> tensor,int dimension, int index);
+  static MatrixXi slice(Tensor<int, 3> tensor,int dimension, int index);
 };
 
 #endif /* Utils_h */

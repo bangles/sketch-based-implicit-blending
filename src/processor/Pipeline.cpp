@@ -11,8 +11,6 @@
 #define LOG(x) std::cout << x << std::endl
 using namespace std;
 
-typedef Triplet<double, int> ETriplet;
-typedef SparseMatrix<double> SpMat;
 typedef Tensor<float, 3> Tensor3f;
 
 Pipeline::Pipeline(QOpenGLShaderProgram *program) {
@@ -40,10 +38,23 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
 void Pipeline::registerPoints() {
   m_regProcessor->registerPoints(userPoints->m_userPoints);
   m_template->updatePatches();
+
+  //  Tensor3f test(3, 3, 3);
+  //  int count = 1;
+
+  //  for (int i = 0; i < 3; i++) {
+  //    for (int j = 0; j < 3; j++) {
+  //      for (int k = 0; k < 3; k++) {
+  //        test(j, k, i) = count++;
+  //      }
+  //    }
+  //  }
+
+  //  MatrixXf slice0 = Utils::slice(test,2,0);
 }
 
 void Pipeline::start() {
-  vector<MatrixXf> G = m_opGenerator->generateOperator(20);
+  Tensor3f G = m_opGenerator->generateOperator(50);
   //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
   //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
   //  LOG(sphere1->distanceField);

@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Sketch Based Implicit Blending</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -54,9 +54,6 @@
         <enum>Qt::RightToLeft</enum>
        </property>
       </widget>
-      <zorder>widget</zorder>
-      <zorder>widget</zorder>
-      <zorder></zorder>
      </widget>
     </item>
     <item>

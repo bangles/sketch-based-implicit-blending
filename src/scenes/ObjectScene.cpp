@@ -13,14 +13,14 @@ ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline)
 }
 
 void ObjectScene::initializeSamples() {
-  int n = 300;
+  int n = 30;
   Vector2f p1 = m_pipeline->circle2->center;
   p1[0] -= m_pipeline->circle2->r1;
   Vector2f p2 = m_pipeline->circle1->center;
   p2[0] -= m_pipeline->circle1->r1;
 
   samples.resize(2, n * 2);
-  samples << interpolatePoints(p1, p2, 300), interpolateArc(m_pipeline->circle1->center, m_pipeline->circle1->r1, M_PI, 2 * M_PI, n);
+  samples << interpolatePoints(p1, p2, n), interpolateArc(m_pipeline->circle1->center, m_pipeline->circle1->r1, M_PI, 2 * M_PI, n);
 
   m_vbo[3].bind();
   m_vbo[3].setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -104,12 +104,6 @@ void ObjectScene::updateBuffers() {
 void ObjectScene::bindObject(int i, Circle *circle) {
   m_vbo[i].bind();
   m_vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-  //  MatrixXf vertices(3,circle->vertices.cols()+1);
-  //  vertices.col(0) << circle->center[0], circle->center[1], 0;
-  //  vertices.block(0,1,3,circle->vertices.cols()) << circle->vertices;
-
-  //  m_vbo[i].allocate(circle->vertices.data(),circle->vertices.size() * sizeof(float));
-  //  m_vbo[i].allocate(vertices.data(),vertices.size() * sizeof(float));
   m_vbo[i].allocate(circle->triangles.data(), circle->triangles.size() * 4 * sizeof(GL_DOUBLE));
 
   m_vao[i].bind();
@@ -117,11 +111,6 @@ void ObjectScene::bindObject(int i, Circle *circle) {
   m_program->setAttributeBuffer(0, GL_DOUBLE, 0, 2);
   m_vbo[i].release();
   m_vao[i].release();
-
-  //  index_vbo[i].bind();
-  //  index_vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-  //  index_vbo[i].allocate(circle->faces.data(), circle->faces.size() * sizeof(GLuint));
-  //  index_vbo[i].release();
 }
 
 void ObjectScene::blend() {

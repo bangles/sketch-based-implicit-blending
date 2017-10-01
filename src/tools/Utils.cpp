@@ -46,3 +46,24 @@ MatrixXf Utils::slice(Tensor<float, 3> tensor, int dimension, int index) {
 
   return result;
 }
+
+typedef Map<MatrixXi, 0, Stride<Dynamic, Dynamic>> EMapI;
+// Supported just for cubic 3d tensors
+MatrixXi Utils::slice(Tensor<int, 3> tensor, int dimension, int index) {
+  int size = tensor.dimension(0);
+  MatrixXi result(0, 0);
+
+  switch (dimension) {
+  case 0:
+    result = EMapI(tensor.data() + index, size, size, Stride<Dynamic, Dynamic>(size, size * size));
+    break;
+  case 1:
+    result = EMapI(tensor.data() + index * size, size, size, Stride<Dynamic, Dynamic>(size * size, 1));
+    break;
+  case 2:
+    result = EMapI(tensor.data() + index * size * size, size, size, Stride<Dynamic, Dynamic>(size, 1));
+    break;
+  }
+
+  return result;
+}

@@ -7,13 +7,13 @@ MatrixXf VolumeGenerator::generate(MatrixXf &df1, MatrixXf &df2, MatrixXf &alpha
   return F;
 }
 
-Tensor3f VolumeGenerator::generate(Tensor3f &df1, Tensor3f &df2, Tensor3f &alpha, vector<MatrixXf> &G) {
+Tensor3f VolumeGenerator::generate(Tensor3f &df1, Tensor3f &df2, Tensor3f &alpha, Tensor3f &G) {
   Tensor3f F = interpolate3(df1, df2, alpha, G);
   return F;
 }
 
-Tensor3f VolumeGenerator::interpolate3(Tensor3f &df1, Tensor3f &df2, Tensor3f &alpha, vector<MatrixXf> &G) {
-  int size = G.size();
+Tensor3f VolumeGenerator::interpolate3(Tensor3f &df1, Tensor3f &df2, Tensor3f &alpha, Tensor3f &G) {
+  int size = G.dimension(0);
 
   Tensor3f F(df1.dimensions());
   VectorXf indices = VectorXf::LinSpaced(size, 0, 1);
@@ -41,10 +41,10 @@ Tensor3f VolumeGenerator::interpolate3(Tensor3f &df1, Tensor3f &df2, Tensor3f &a
         float yd = (df2(i, j, k) - indices(indexY)) / (indices(indexY + 1) - indices(indexY));
         float zd = (alpha(i, j, k) - indices(indexZ)) / (indices(indexZ + 1) - indices(indexZ));
 
-        float c00 = G[indexX](indexY, indexZ) * (1 - xd) + G[indexX + 1](indexY, indexZ) * xd;
-        float c01 = G[indexX](indexY, indexZ + 1) * (1 - xd) + G[indexX + 1](indexY, indexZ + 1) * xd;
-        float c10 = G[indexX](indexY + 1, indexZ) * (1 - xd) + G[indexX + 1](indexY + 1, indexZ) * xd;
-        float c11 = G[indexX](indexY + 1, indexZ + 1) * (1 - xd) + G[indexX + 1](indexY + 1, indexZ + 1) * xd;
+        float c00 = G(indexX, indexY, indexZ) * (1 - xd) + G(indexX + 1, indexY, indexZ) * xd;
+        float c01 = G(indexX, indexY, indexZ + 1) * (1 - xd) + G(indexX + 1, indexY, indexZ + 1) * xd;
+        float c10 = G(indexX, indexY + 1, indexZ) * (1 - xd) + G(indexX + 1, indexY + 1, indexZ) * xd;
+        float c11 = G(indexX, indexY + 1, indexZ + 1) * (1 - xd) + G(indexX + 1, indexY + 1, indexZ + 1) * xd;
 
         float c1 = c01 * (1 - yd) + c11 * yd;
         float c0 = c00 * (1 - yd) + c10 * yd;
