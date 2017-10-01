@@ -3,6 +3,7 @@
 
 #include "Pipeline.hpp"
 #include "Camera.h"
+//#include "Grid.hpp"
 #include <Eigen/Dense>
 #include <string>
 #include <stdio.h>
@@ -19,6 +20,7 @@ private:
     Camera m_camera;
     QOpenGLShaderProgram *m_program;
     Pipeline *m_pipeline;
+//    Grid* grid;
 public:
     SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
     ~SynthesisScene();

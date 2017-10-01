@@ -5,12 +5,15 @@
 //
 //
 
+#include "Utils.h"
 #include <Pipeline.hpp>
+
 #define LOG(x) std::cout << x << std::endl
 using namespace std;
 
 typedef Triplet<double, int> ETriplet;
 typedef SparseMatrix<double> SpMat;
+typedef Tensor<float, 3> Tensor3f;
 
 Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   m_template = new Template(program);
@@ -26,7 +29,12 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
 
   circle1 = new Circle(0, -0.35, 0.25, 0.6, X, Y);
   circle2 = new Circle(0, 0.35, 0.25, 0.6, X, Y);
+
+  sphere1 = new Sphere(0, -0.35, 0, 0.25, 0.6, S);
+  sphere2 = new Sphere(0, 0.35, 0, 0.25, 0.6, S);
+
   result = new Result(X, Y, program);
+  result3D = new Result3D(S, program);
 }
 
 void Pipeline::registerPoints() {
@@ -34,12 +42,17 @@ void Pipeline::registerPoints() {
   m_template->updatePatches();
 }
 
-
 void Pipeline::start() {
-  vector<MatrixXf> G = m_opGenerator->generateOperator(30);
-  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
-  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
-  result->setDistanceField(distanceField);
+  vector<MatrixXf> G = m_opGenerator->generateOperator(20);
+  //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
+  //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
+  //  LOG(sphere1->distanceField);
+  //  LOG(sphere2->distanceField);
+
+  Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
+  Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
+
+  result3D->setDistanceField(distanceField);
 }
 
 void Pipeline::mapSamplesToTemplate(MatrixXf samples) {
@@ -64,5 +77,21 @@ MatrixXf Pipeline::calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2])
   MatrixXf mag2 = (g2[0].array().pow(2) + g2[1].array().pow(2)).sqrt();
   MatrixXf dotP = ((g1[0].array() * g2[0].array()) + (g1[1].array() * g2[1].array())) / (mag1.array() * mag2.array());
   MatrixXf alpha = dotP.array().acos() / M_PI;
+  return alpha;
+}
+
+Tensor<float, 3> Pipeline::calculateGradientAngles(Tensor<float, 3> (&g1)[3], Tensor<float, 3> (&g2)[3]) {
+  int res = g1[0].dimension(0);
+  Tensor<float, 3> alpha(res, res, res);
+  for (int i = 0; i < res; i++) {
+    for (int j = 0; j < res; j++) {
+      for (int k = 0; k < res; k++) {
+        float mag1 = sqrt(pow(g1[0](i, j, k), 2) + pow(g1[1](i, j, k), 2) + pow(g1[2](i, j, k), 2));
+        float mag2 = sqrt(pow(g2[0](i, j, k), 2) + pow(g2[1](i, j, k), 2) + pow(g2[2](i, j, k), 2));
+        float dotP = ((g1[0](i, j, k) * g2[0](i, j, k)) + (g1[1](i, j, k) * g2[1](i, j, k))) / (mag1 * mag2);
+        alpha(i, j, k) = acos(dotP) / M_PI;
+      }
+    }
+  }
   return alpha;
 }

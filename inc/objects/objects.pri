@@ -8,4 +8,5 @@ HEADERS +=  \
     $$PWD/UserPoints.hpp \
     $$PWD/circle.h \
     $$PWD/Result.h \
-    $$PWD/sphere.h
+    $$PWD/sphere.h \
+    $$PWD/Result3D.h

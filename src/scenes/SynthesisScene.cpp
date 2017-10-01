@@ -6,6 +6,7 @@
 SynthesisScene::SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
   this->m_program = program;
   this->m_pipeline = pipeline;
+//  grid = new Grid(3 * 44, m_program);
   m_camera.setPosition(glm::vec3(0, 0.5, 3));
 }
 
@@ -13,10 +14,12 @@ SynthesisScene::~SynthesisScene() {}
 
 void SynthesisScene::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
 
-  if (m_pipeline->result->isSet) {
-    m_pipeline->result->render();
+  if (m_pipeline->result3D->isSet) {
+//    grid->render();
+    m_pipeline->result3D->render();
   }
 }
 
@@ -47,12 +50,6 @@ void SynthesisScene::update() {
   if (Input::keyPressed(Qt::Key_X)) {
     m_camera.offsetPosition(moveSpeed * glm::vec3(0, 1, 0));
   }
-  //  if (Input::keyPressed(Qt::Key_P)) {
-  //    process();
-  //  }
-  //  if (Input::keyPressed(Qt::Key_I)) {
-  //    start();
-  //  }
 }
 
 void SynthesisScene::cleanUp() {}

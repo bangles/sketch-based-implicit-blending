@@ -51,6 +51,7 @@ void ObjectScene::initializeBoundary() {
 
 void ObjectScene::render() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   m_program->setUniformValue("camera", QMatrix4x4());
   m_vao[0].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));

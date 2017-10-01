@@ -14,6 +14,7 @@ TemplateScene::~TemplateScene() {}
 
 void TemplateScene::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
   grid->render();
   m_pipeline->m_template->render();

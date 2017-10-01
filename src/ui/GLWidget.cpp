@@ -23,10 +23,14 @@ void GLWidget::initializeGL() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glShadeModel(GL_SMOOTH);
   glPointSize(8.0f);
 
   //    glFrustum(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
   //    glOrtho(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
+
+  static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
   m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
   m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");
@@ -40,6 +44,7 @@ void GLWidget::initializeGL() {
 
 void GLWidget::resizeGL(int width, int height) {
       templateScene->setViewportAspectRatio((float)width/height);
+      synthesisScene->setViewportAspectRatio((float)width/height);
 }
 
 void GLWidget::paintGL() {

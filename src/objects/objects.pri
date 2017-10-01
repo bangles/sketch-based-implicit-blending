@@ -7,4 +7,5 @@ SOURCES +=  \
     $$PWD/UserPoints.cpp \
     $$PWD/circle.cpp \
     $$PWD/Result.cpp \
-    $$PWD/sphere.cpp
+    $$PWD/sphere.cpp \
+    $$PWD/Result3D.cpp

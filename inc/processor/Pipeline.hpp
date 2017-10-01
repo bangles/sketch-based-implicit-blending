@@ -17,7 +17,9 @@
 #include <eigen3/unsupported/Eigen/CXX11/Tensor>
 #include <UserPoints.hpp>
 #include "circle.h"
+#include "sphere.h"
 #include "Result.h"
+#include "Result3D.h"
 
 class Pipeline {
 private:
@@ -29,12 +31,15 @@ public:
     Pipeline(QOpenGLShaderProgram *program);
     ~Pipeline();
     Circle *circle1, *circle2;
+    Sphere *sphere1, *sphere2;
     Result *result;
+    Result3D *result3D;
     Template* m_template;
     UserPoints* userPoints;
 
     void mapSamplesToTemplate(MatrixXf samples);
     MatrixXf calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2]);
+    Tensor<float,3> calculateGradientAngles(Tensor<float,3> (&g1)[3], Tensor<float,3> (&g2)[3]);
     void registerPoints();
     void start();
 };
