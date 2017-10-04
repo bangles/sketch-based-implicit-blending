@@ -18,7 +18,7 @@ void Result::setDistanceField(MatrixXf &df) {
   isSet = true;
 }
 
-void Result::polygonize(float isoValue) { marchingSquares(m_X, m_Y, distanceField, isoValue, line_segments, triangles); }
+void Result::polygonize(float isoValue) { marchingSquares(m_X, m_Y, distanceField, isoValue, triangles, true); }
 
 void Result::initializeBuffers() {
   m_vbo.create();

@@ -19,8 +19,8 @@ private:
 public:
     VolumeGenerator();
     ~VolumeGenerator();
-    MatrixXf generate(MatrixXf &df1, MatrixXf &df2, MatrixXf &alpha, vector<MatrixXf> &G);
-    MatrixXf interpolate3(MatrixXf &df1, MatrixXf &df2, MatrixXf &alpha, vector<MatrixXf> &G);
+    MatrixXf generate(MatrixXf &df1, MatrixXf &df2, MatrixXf &alpha, Tensor3f &G);
+    MatrixXf interpolate3(MatrixXf &df1, MatrixXf &df2, MatrixXf &alpha, Tensor3f &G);
 
 
     Tensor3f generate(Tensor3f &df1, Tensor3f &df2, Tensor3f &alpha, Tensor3f &G);

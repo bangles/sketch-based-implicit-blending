@@ -9,7 +9,7 @@
 void marchingSquares(
     const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y,
     const Eigen::MatrixXf &S, double isoValue,
-    std::vector<Eigen::Vector2d> &line_segments,
-    std::vector<Eigen::Vector2d> &triangles);
+    std::vector<Eigen::Vector2d> &vertices,
+    bool fill);
 
 #endif

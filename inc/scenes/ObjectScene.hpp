@@ -13,11 +13,9 @@ using namespace Eigen;
 
 class ObjectScene {
 private:
-  bool isBlended;
   QOpenGLShaderProgram *m_program;
   Pipeline *m_pipeline;
   MatrixXf boundary;
-  //    QOpenGLBuffer index_vbo[2];
   QOpenGLBuffer m_vbo[4];
   QOpenGLVertexArrayObject m_vao[4];
 
@@ -27,7 +25,6 @@ public:
   ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline);
   ~ObjectScene();
   void render();
-  void blend();
   void start();
   void update();
   void cleanUp();

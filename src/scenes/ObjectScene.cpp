@@ -53,20 +53,22 @@ void ObjectScene::render() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   m_program->setUniformValue("camera", QMatrix4x4());
+
+  m_vao[0].bind();
+  m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));
+  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.size(), m_pipeline->circle1->line_segments.size());
+
+  m_vao[1].bind();
+  m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
+  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.size(), m_pipeline->circle2->line_segments.size());
+
   m_vao[0].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));
   glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle1->triangles.size());
 
-  //  index_vbo[0].bind();
-  //  glDrawElements(GL_TRIANGLES, circle1->faces.size() * 6, GL_UNSIGNED_INT, 0);
-
-  if (!isBlended) {
-    m_vao[1].bind();
-    m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
-    glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle2->triangles.size());
-    //    index_vbo[1].bind();
-    //    glDrawElements(GL_TRIANGLES, circle2->faces.size() * 6, GL_UNSIGNED_INT, 0);
-  }
+  m_vao[1].bind();
+  m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
+  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle2->triangles.size());
 
   m_vao[2].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
@@ -74,7 +76,6 @@ void ObjectScene::render() {
 
   m_vao[3].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
-  //  glDrawArrays(GL_LINE_STRIP, 0, samples.cols());
   glDrawArrays(GL_POINTS, 0, samples.cols());
 }
 
@@ -104,19 +105,14 @@ void ObjectScene::updateBuffers() {
 void ObjectScene::bindObject(int i, Circle *circle) {
   m_vbo[i].bind();
   m_vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vbo[i].allocate(circle->triangles.data(), circle->triangles.size() * 4 * sizeof(GL_DOUBLE));
-
+  m_vbo[i].allocate((circle->line_segments.size() + circle->triangles.size()) * 4 * sizeof(GL_DOUBLE));
+  m_vbo[i].write(0, circle->triangles.data(), circle->triangles.size() * 4 * sizeof(GL_DOUBLE));
+  m_vbo[i].write(circle->triangles.size() * 4 * sizeof(GL_DOUBLE), circle->line_segments.data(), circle->line_segments.size() * 4 * sizeof(GL_DOUBLE));
   m_vao[i].bind();
   m_program->enableAttributeArray(0);
   m_program->setAttributeBuffer(0, GL_DOUBLE, 0, 2);
   m_vbo[i].release();
   m_vao[i].release();
-}
-
-void ObjectScene::blend() {
-  isBlended = true;
-  m_pipeline->circle1->blend(m_pipeline->circle2);
-  bindObject(0, m_pipeline->circle1);
 }
 
 MatrixXf ObjectScene::interpolatePoints(Vector2f p1, Vector2f p2, int samples) {

@@ -18,9 +18,13 @@ void SynthesisScene::render() {
   m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
 
   if (m_pipeline->result3D->isSet) {
-//    grid->render();
     m_pipeline->result3D->render();
   }
+
+//  if (m_pipeline->result->isSet) {
+//    m_pipeline->result->render();
+//  }
+
 }
 
 void SynthesisScene::update() {

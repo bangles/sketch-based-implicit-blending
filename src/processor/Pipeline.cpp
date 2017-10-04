@@ -38,32 +38,18 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
 void Pipeline::registerPoints() {
   m_regProcessor->registerPoints(userPoints->m_userPoints);
   m_template->updatePatches();
-
-  //  Tensor3f test(3, 3, 3);
-  //  int count = 1;
-
-  //  for (int i = 0; i < 3; i++) {
-  //    for (int j = 0; j < 3; j++) {
-  //      for (int k = 0; k < 3; k++) {
-  //        test(j, k, i) = count++;
-  //      }
-  //    }
-  //  }
-
-  //  MatrixXf slice0 = Utils::slice(test,2,0);
 }
 
 void Pipeline::start() {
   Tensor3f G = m_opGenerator->generateOperator(50);
-  //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
-  //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
-  //  LOG(sphere1->distanceField);
-  //  LOG(sphere2->distanceField);
 
   Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
   Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
-
   result3D->setDistanceField(distanceField);
+
+//  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
+//  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
+//  result->setDistanceField(distanceField);
 }
 
 void Pipeline::mapSamplesToTemplate(MatrixXf samples) {

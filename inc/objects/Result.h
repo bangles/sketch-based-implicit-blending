@@ -24,7 +24,7 @@ public:
   MatrixXf gradient[2];
   bool isSet;
 
-  std::vector<Vector2d> line_segments, triangles;
+  std::vector<Vector2d> triangles;
 
   Result(MatrixXf &X, MatrixXf &Y, QOpenGLShaderProgram *program);
   void setDistanceField(MatrixXf &df);
