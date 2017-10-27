@@ -415,7 +415,10 @@ void genGeometry(const GridCell &gridCell, std::vector<Eigen::Vector2d> &vertice
 
 } // namespace
 
-void marchingSquares(const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y, const Eigen::MatrixXf &S, double isoValue, std::vector<Eigen::Vector2d> &vertices, bool fill) {
+Eigen::MatrixXd marchingSquares(const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y, const Eigen::MatrixXf &S, double isoValue, bool fill) {
+  std::vector<Eigen::Vector2d> verticesVector;
+  verticesVector.clear();
+
   for (int x = 0; x < X.rows() - 1; x++) {
     for (int y = 0; y < Y.rows() - 1; y++) {
       GridCell gc;
@@ -429,7 +432,9 @@ void marchingSquares(const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y, const E
       gc.value[2] = S(x + 1, y + 1);
       gc.value[3] = S(x, y + 1);
 
-      genGeometry(gc, vertices, isoValue, fill);
+      genGeometry(gc, verticesVector, isoValue, fill);
     }
   }
+  Eigen::Map<Eigen::MatrixXd> vertices(verticesVector.data()->data(), 2, verticesVector.size());
+  return vertices;
 }

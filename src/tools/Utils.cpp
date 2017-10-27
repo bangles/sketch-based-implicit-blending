@@ -67,3 +67,7 @@ MatrixXi Utils::slice(Tensor<int, 3> tensor, int dimension, int index) {
 
   return result;
 }
+
+Vector2f Utils::mapPointToGL(QPoint point, int width, int height) { return Vector2f(2 * ((float)point.x() / width - 0.5), 2 * (0.5 - (float)point.y() / height)); }
+
+Vector2f Utils::mapPointToGL(float x, float y, int width, int height) { return Vector2f(2 * (x / width - 0.5), 2 * (0.5 - y / height)); }

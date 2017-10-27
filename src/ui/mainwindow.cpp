@@ -32,6 +32,7 @@ void MainWindow::changeScene(int index) {
     ui->glwidget->startSynthesisScene();
     break;
   }
+//  QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::on_pushButton_2_clicked() { ui->glwidget->m_pipeline->mapSamplesToTemplate(ui->glwidget->objectScene->samples); }
@@ -39,3 +40,17 @@ void MainWindow::on_pushButton_2_clicked() { ui->glwidget->m_pipeline->mapSample
 void MainWindow::on_pushButton_3_clicked() { ui->glwidget->m_pipeline->start(); }
 
 void MainWindow::on_pushButton_5_clicked() { ui->glwidget->m_pipeline->registerPoints(); }
+
+void MainWindow::on_toolButton_clicked()
+{
+    if(ui->glwidget->state == STATE_OBJECTS) {
+        ui->glwidget->objectScene->setState(STATE_MOVE);
+    }
+}
+
+void MainWindow::on_toolButton_2_clicked()
+{
+    if(ui->glwidget->state == STATE_OBJECTS) {
+        ui->glwidget->objectScene->setState(STATE_SKETCH);
+    }
+}

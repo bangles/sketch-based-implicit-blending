@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>resources/fs.glsl</file>
         <file>resources/vs.glsl</file>
+        <file>resources/4HeadArrow.png</file>
+        <file>resources/brush.png</file>
     </qresource>
 </RCC>

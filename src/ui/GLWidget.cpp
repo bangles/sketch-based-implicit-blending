@@ -29,7 +29,7 @@ void GLWidget::initializeGL() {
   //    glFrustum(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
   //    glOrtho(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
 
-  static GLfloat lightPosition[4] = { 0, 0, 10, 1.0 };
+  static GLfloat lightPosition[4] = {0, 0, 10, 1.0};
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
   m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
@@ -43,8 +43,8 @@ void GLWidget::initializeGL() {
 }
 
 void GLWidget::resizeGL(int width, int height) {
-      templateScene->setViewportAspectRatio((float)width/height);
-      synthesisScene->setViewportAspectRatio((float)width/height);
+  templateScene->setViewportAspectRatio((float)width / height);
+  synthesisScene->setViewportAspectRatio((float)width / height);
 }
 
 void GLWidget::paintGL() {
@@ -111,9 +111,33 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event) {
   }
 }
 
-void GLWidget::mousePressEvent(QMouseEvent *event) { Input::registerMousePress(event->button()); }
+void GLWidget::mousePressEvent(QMouseEvent *event) {
+  if (event->button() == Qt::LeftButton) {
+    switch (state) {
+    case STATE_OBJECTS:
+      objectScene->handleMouseClick(event->pos(), this->width(), this->height());
+      break;
+    }
+  }
+}
 
-void GLWidget::mouseReleaseEvent(QMouseEvent *event) { Input::registerMouseRelease(event->button()); }
+void GLWidget::mouseMoveEvent(QMouseEvent *event) {
+  if (event->buttons() & Qt::LeftButton) {
+    switch (state) {
+    case STATE_OBJECTS:
+      objectScene->handleMouseDrag(event->pos(), this->width(), this->height());
+      break;
+    }
+  }
+}
+
+void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
+    switch (state) {
+    case STATE_OBJECTS:
+      objectScene->handleMouseRelease();
+      break;
+    }
+}
 
 void GLWidget::printContextInformation() {
   QString glType;

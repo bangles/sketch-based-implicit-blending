@@ -1,4 +1,7 @@
 #include "OperatorGenerator.h"
+#include "Utils.h"
+#include <Eigen/IterativeLinearSolvers>
+#include <unsupported/Eigen/SparseExtra>
 
 #define LOG(x) std::cout << x << std::endl
 
@@ -10,7 +13,7 @@ Tensor3f OperatorGenerator::generateOperator(int S) {
 
   VectorXf V = findVs(S);
 
-  int sampleCount = 200;
+  int sampleCount = 501;
 
   Tensor3f G, G1(S, S, S), G2(S, S, S);
   Tensor3i mask, mask1(S, S, S), mask2(S, S, S);
@@ -80,7 +83,13 @@ Tensor3f OperatorGenerator::generateOperator(int S) {
     }
   }
 
+  LOG("Starting solve");
+  long int before = mach_absolute_time();
   solve(G, mask, S);
+  long int after = mach_absolute_time();
+  int elapsed = ((after - before) * 100) / (1000 * 1000 * 1000);
+
+  LOG("solve ended, Time taken " << elapsed / 100.0);
 
   //  Tensor3f gG[2];
   //  gG[0].resize(S, S, S);
@@ -106,19 +115,29 @@ void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
   const int neighborhood[13] = {0, 1, -1, S, -S, -S - 1, S - 1, S + 1, -S + 1, 2, -2, 2 * S, -2 * S};
   const double kernel[13] = {20.0, -8.0, -8.0, -8.0, -8.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0};
 
-  VectorXf b(S * S * S);
-  VectorXf x(S * S * S);
+  VectorXf b(S * S);
+  VectorXf x(S * S);
+
+  SpMat L(S * S, S * S);
+  SparseLU<SpMat> solver;
+  //  LeastSquaresConjugateGradient<SpMat> solver;
+  //    ConjugateGradient<SpMat> solver;
+  //    BiCGSTAB<SpMat> solver;
 
   vector<ETriplet> tripletList;
 
   for (int i = 0; i < S; i++) {
+
+    MatrixXf G_slice = Utils::slice(G, 2, i);
+    MatrixXi mask_slice = Utils::slice(mask, 2, i);
+
     for (int j = 0; j < S; j++) {
       for (int k = 0; k < S; k++) {
-        int index = k + S * (j + S * i);
+        int index = k + S * j;
 
-        if (mask(i, j, k)) {
+        if (mask_slice(j, k)) {
           tripletList.push_back(ETriplet(index, index, 1.0));
-          b[index] = G(i, j, k);
+          b[index] = G_slice(j, k);
         } else {
           for (int a = 0; a < 13; a++) {
             tripletList.push_back(ETriplet(index, index + neighborhood[a], kernel[a]));
@@ -127,24 +146,26 @@ void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
         }
       }
     }
-  }
 
-  // Sparse init
-  SpMat L(S * S * S, S * S * S);
-  L.setFromTriplets(tripletList.begin(), tripletList.end());
+    LOG(i);
 
-  // Solve
-  SparseLU<SpMat> solver;
-  solver.compute(L);
-  x = solver.solve(b);
+    //    solver.compute(L);
+    L.makeCompressed();
+    L.setFromTriplets(tripletList.begin(), tripletList.end());
+    solver.compute(L);
+    x = solver.solve(b);
 
-  // Extract
-  for (int i = 0; i < S; i++) {
+    //    Eigen::saveMarket(L, "filename.mtx");
+    //    Eigen::saveMarket(L, "filename_SPD.mtx", Eigen::Symmetric); // if A is symmetric-positive-definite
+    //    Eigen::saveMarketVector(b, "filename_b.mtx");
+
     for (int j = 0; j < S; j++) {
       for (int k = 0; k < S; k++) {
-        G(i, j, k) = x[k + S * (j + S * i)];
+        G(j, k, i) = x(k + S * j);
       }
     }
+
+    tripletList.clear();
   }
 }
 

@@ -6,10 +6,6 @@
 #include <functional>
 #include <vector>
 
-void marchingSquares(
-    const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y,
-    const Eigen::MatrixXf &S, double isoValue,
-    std::vector<Eigen::Vector2d> &vertices,
-    bool fill);
+Eigen::MatrixXd marchingSquares(const Eigen::MatrixXf &X, const Eigen::MatrixXf &Y, const Eigen::MatrixXf &S, double isoValue, bool fill);
 
 #endif

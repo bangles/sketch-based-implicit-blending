@@ -1,35 +1,15 @@
 #include "ObjectScene.hpp"
 
-ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline)
-/*: index_vbo{QOpenGLBuffer(QOpenGLBuffer::IndexBuffer),
-                QOpenGLBuffer(QOpenGLBuffer::IndexBuffer)}*/ {
+#define LOG(x) std::cout << x << std::endl
+
+ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
   this->m_program = program;
   this->m_pipeline = pipeline;
+  //  this->state = STATE_CAMERA;
 
   initializeBuffers();
   initializeBoundary();
-  initializeSamples();
   updateBuffers();
-}
-
-void ObjectScene::initializeSamples() {
-  int n = 30;
-  Vector2f p1 = m_pipeline->circle2->center;
-  p1[0] -= m_pipeline->circle2->r1;
-  Vector2f p2 = m_pipeline->circle1->center;
-  p2[0] -= m_pipeline->circle1->r1;
-
-  samples.resize(2, n * 2);
-  samples << interpolatePoints(p1, p2, n), interpolateArc(m_pipeline->circle1->center, m_pipeline->circle1->r1, M_PI, 2 * M_PI, n);
-
-  m_vbo[3].bind();
-  m_vbo[3].setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vbo[3].allocate(samples.data(), samples.size() * sizeof(GL_FLOAT));
-  m_vao[3].bind();
-  m_program->enableAttributeArray(0);
-  m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
-  m_vbo[3].release();
-  m_vao[3].release();
 }
 
 void ObjectScene::initializeBoundary() {
@@ -56,19 +36,19 @@ void ObjectScene::render() {
 
   m_vao[0].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));
-  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.size(), m_pipeline->circle1->line_segments.size());
+  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.cols(), m_pipeline->circle1->line_segments.cols());
 
   m_vao[1].bind();
   m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
-  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.size(), m_pipeline->circle2->line_segments.size());
+  glDrawArrays(GL_LINES, m_pipeline->circle1->triangles.cols(), m_pipeline->circle2->line_segments.cols());
 
   m_vao[0].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 1.0f));
-  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle1->triangles.size());
+  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle1->triangles.cols());
 
   m_vao[1].bind();
   m_program->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
-  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle2->triangles.size());
+  glDrawArrays(GL_TRIANGLES, 0, m_pipeline->circle2->triangles.cols());
 
   m_vao[2].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
@@ -76,7 +56,7 @@ void ObjectScene::render() {
 
   m_vao[3].bind();
   m_program->setUniformValue("color", QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
-  glDrawArrays(GL_POINTS, 0, samples.cols());
+  glDrawArrays(GL_POINTS, 0, samples.size());
 }
 
 void ObjectScene::initializeBuffers() {
@@ -92,9 +72,6 @@ void ObjectScene::initializeBuffers() {
   // samples
   m_vbo[3].create();
   m_vao[3].create();
-
-  //  index_vbo[0].create();
-  //  index_vbo[1].create();
 }
 
 void ObjectScene::updateBuffers() {
@@ -105,14 +82,92 @@ void ObjectScene::updateBuffers() {
 void ObjectScene::bindObject(int i, Circle *circle) {
   m_vbo[i].bind();
   m_vbo[i].setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vbo[i].allocate((circle->line_segments.size() + circle->triangles.size()) * 4 * sizeof(GL_DOUBLE));
-  m_vbo[i].write(0, circle->triangles.data(), circle->triangles.size() * 4 * sizeof(GL_DOUBLE));
-  m_vbo[i].write(circle->triangles.size() * 4 * sizeof(GL_DOUBLE), circle->line_segments.data(), circle->line_segments.size() * 4 * sizeof(GL_DOUBLE));
+  m_vbo[i].allocate((circle->line_segments.cols() + circle->triangles.cols()) * 4 * sizeof(GL_DOUBLE));
+  m_vbo[i].write(0, circle->triangles.data(), circle->triangles.cols() * 4 * sizeof(GL_DOUBLE));
+  m_vbo[i].write(circle->triangles.cols() * 4 * sizeof(GL_DOUBLE), circle->line_segments.data(), circle->line_segments.cols() * 4 * sizeof(GL_DOUBLE));
   m_vao[i].bind();
   m_program->enableAttributeArray(0);
   m_program->setAttributeBuffer(0, GL_DOUBLE, 0, 2);
   m_vbo[i].release();
   m_vao[i].release();
+}
+
+void ObjectScene::setState(int state) {
+  this->state = state;
+
+  switch (state) {
+  case STATE_MOVE:
+    QApplication::setOverrideCursor(Qt::SizeAllCursor);
+    break;
+  case STATE_SKETCH:
+    QApplication::setOverrideCursor(Qt::PointingHandCursor);
+    break;
+  }
+}
+
+void ObjectScene::addUserPoint(Vector2f point) {
+  samples.push_back(point);
+
+  m_vbo[3].bind();
+  m_vbo[3].setUsagePattern(QOpenGLBuffer::StaticDraw);
+  m_vbo[3].allocate(samples.size() * 2 * sizeof(GL_FLOAT));
+  m_vbo[3].write(0, samples.data(), samples.size() * 2 * sizeof(GL_FLOAT));
+  m_vao[3].bind();
+  m_program->enableAttributeArray(0);
+  m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+  m_vbo[3].release();
+  m_vao[3].release();
+}
+
+void ObjectScene::handleMouseClick(QPoint point, float width, float height) {
+
+  VectorXf mappedPoint = Utils::mapPointToGL(point, width, height);
+
+  switch (state) {
+  case STATE_MOVE:
+    if (m_pipeline->circle1->bounds.contains(mappedPoint[0], mappedPoint[1])) {
+      state = STATE_MOVE_ACTIVATED;
+      activatedCircle = m_pipeline->circle1;
+    }
+
+    if (m_pipeline->circle2->bounds.contains(mappedPoint[0], mappedPoint[1])) {
+      state = STATE_MOVE_ACTIVATED;
+      activatedCircle = m_pipeline->circle2;
+    }
+    break;
+  case STATE_SKETCH:
+    addUserPoint(mappedPoint);
+    break;
+  }
+}
+
+void ObjectScene::handleMouseDrag(QPoint point, float width, float height) {
+  VectorXf mappedPoint = Utils::mapPointToGL(point, width, height);
+
+  switch (state) {
+  case STATE_MOVE:
+    break;
+  case STATE_MOVE_ACTIVATED: {
+    float deltaX = 2 * Input::mouseDelta().x() / width;
+    float deltaY = 2 * -Input::mouseDelta().y() / height;
+    activatedCircle->move(deltaX, deltaY);
+    updateBuffers();
+    break;
+  }
+  case STATE_SKETCH:
+    addUserPoint(mappedPoint);
+    break;
+  }
+}
+
+void ObjectScene::handleMouseRelease() {
+  switch (state) {
+  case STATE_MOVE:
+    break;
+  case STATE_MOVE_ACTIVATED:
+    state = STATE_MOVE;
+    break;
+  }
 }
 
 MatrixXf ObjectScene::interpolatePoints(Vector2f p1, Vector2f p2, int samples) {

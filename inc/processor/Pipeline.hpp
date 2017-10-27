@@ -26,6 +26,7 @@ private:
     RegistrationProcessor *m_regProcessor;
     OperatorGenerator *m_opGenerator;
     VolumeGenerator *m_volGenerator;
+    int S;
 
 public:
     Pipeline(QOpenGLShaderProgram *program);
@@ -37,9 +38,10 @@ public:
     Template* m_template;
     UserPoints* userPoints;
 
-    void mapSamplesToTemplate(MatrixXf samples);
+    void mapSamplesToTemplate(vector<Vector2f> sampleVector);
     MatrixXf calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2]);
     Tensor<float,3> calculateGradientAngles(Tensor<float,3> (&g1)[3], Tensor<float,3> (&g2)[3]);
+    void initializeSpheres();
     void registerPoints();
     void start();
 };

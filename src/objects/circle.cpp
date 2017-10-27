@@ -9,6 +9,7 @@ Circle::Circle(float x1, float y1, float in_r1, float in_r2, MatrixXf &X, Matrix
   r2 = in_r2;
   m_X = X;
   m_Y = Y;
+  bounds = QRectF(x1 - in_r1, y1 - in_r1, 2 * in_r1, 2 * in_r1);
   calculateDistanceField(m_X, m_Y, distanceField, gradient);
   polygonize(0.5);
 }
@@ -27,13 +28,24 @@ void Circle::calculateDistanceToField(MatrixXf &df) {
 }
 
 void Circle::polygonize(float isoValue) {
-  line_segments.clear();
-  triangles.clear();
-  marchingSquares(m_X, m_Y, distanceField, isoValue, triangles, true);
-  marchingSquares(m_X, m_Y, distanceField, 0.01, line_segments, false);
+  triangles = marchingSquares(m_X, m_Y, distanceField, isoValue, true);
+  line_segments = marchingSquares(m_X, m_Y, distanceField, 0.01, false);
 }
 
 void Circle::blend(Circle *circle) {
   distanceField += circle->distanceField;
   polygonize(0.5);
+}
+
+void Circle::move(float deltaX, float deltaY) {
+  center[0] += deltaX;
+  center[1] += deltaY;
+
+  bounds.adjust(deltaX, deltaY, deltaX, deltaY);
+
+  triangles.row(0) = triangles.row(0).array() + deltaX;
+  triangles.row(1) = triangles.row(1).array() + deltaY;
+
+  line_segments.row(0) = line_segments.row(0).array() + deltaX;
+  line_segments.row(1) = line_segments.row(1).array() + deltaY;
 }

@@ -9,17 +9,17 @@ using namespace Eigen;
 
 UserPoints::UserPoints(QOpenGLShaderProgram *program) {
   this->m_program = program;
-  m_userPoints = MatrixXf(3, NUM_OF_USER_POINTS);
+//  m_userPoints = MatrixXf(3, NUM_OF_USER_POINTS);
 
-  float RADIUS = 0.5f;
+//  float RADIUS = 0.5f;
 
-  for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
-    double angle_rad = 0.3 + 0.4 * PI * i / NUM_OF_USER_POINTS;
-    m_userPoints.col(i) = Vector3f(RADIUS * std::sin(angle_rad), RADIUS * std::cos(angle_rad), 0.5f);
-  }
+//  for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
+//    double angle_rad = 0.3 + 0.4 * PI * i / NUM_OF_USER_POINTS;
+//    m_userPoints.col(i) = Vector3f(RADIUS * std::sin(angle_rad), RADIUS * std::cos(angle_rad), 0.5f);
+//  }
   m_vbo.create();
   m_vao.create();
-  bindPoints();
+//  bindPoints();
 }
 
 void UserPoints::bindPoints() {

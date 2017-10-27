@@ -19,17 +19,13 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   m_opGenerator = new OperatorGenerator(m_template);
   m_volGenerator = new VolumeGenerator();
   userPoints = new UserPoints(program);
-
-  int S = 100;
+  S = 100;
 
   MatrixXf X = RowVectorXf::LinSpaced(S, MIN[0], MAX[0]).replicate(S, 1);
   MatrixXf Y = VectorXf::LinSpaced(S, MIN[1], MAX[1]).replicate(1, S);
 
-  circle1 = new Circle(0, -0.35, 0.25, 0.6, X, Y);
-  circle2 = new Circle(0, 0.35, 0.25, 0.6, X, Y);
-
-  sphere1 = new Sphere(0, -0.35, 0, 0.25, 0.6, S);
-  sphere2 = new Sphere(0, 0.35, 0, 0.25, 0.6, S);
+  circle1 = new Circle(0, -0.25, 0.25, 0.5, X, Y);
+  circle2 = new Circle(0, 0.25, 0.25, 0.5, X, Y);
 
   result = new Result(X, Y, program);
   result3D = new Result3D(S, program);
@@ -40,21 +36,26 @@ void Pipeline::registerPoints() {
   m_template->updatePatches();
 }
 
-void Pipeline::start() {
-  Tensor3f G = m_opGenerator->generateOperator(50);
+void Pipeline::initializeSpheres() {
+  sphere1 = new Sphere(circle1->center[0], circle1->center[1], 0, circle1->r1, circle1->r2, S);
+  sphere2 = new Sphere(circle2->center[0], circle2->center[1], 0, circle2->r1, circle2->r2, S);
+}
 
+void Pipeline::start() {
+  Tensor3f G = m_opGenerator->generateOperator(20);
+  initializeSpheres();
   Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
   Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
   result3D->setDistanceField(distanceField);
 
-//  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
-//  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
-//  result->setDistanceField(distanceField);
+  //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
+  //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
+  //  result->setDistanceField(distanceField);
 }
 
-void Pipeline::mapSamplesToTemplate(MatrixXf samples) {
-  //    sAlpha = gradAngle(gf{1}, gf{2});
-  //    samples = [f{1} f{2} sAlpha];
+void Pipeline::mapSamplesToTemplate(vector<Vector2f> sampleVector) {
+  Map<MatrixXf> samples(sampleVector.data()->data(), 2, sampleVector.size());
+
   MatrixXf f1, f2, g1[2], g2[2];
   MatrixXf X = samples.row(0);
   MatrixXf Y = samples.row(1);
