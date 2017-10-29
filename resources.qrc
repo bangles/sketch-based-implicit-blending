@@ -4,5 +4,7 @@
         <file>resources/vs.glsl</file>
         <file>resources/4HeadArrow.png</file>
         <file>resources/brush.png</file>
+        <file>resources/fs_synthesis.glsl</file>
+        <file>resources/vs_synthesis.glsl</file>
     </qresource>
 </RCC>

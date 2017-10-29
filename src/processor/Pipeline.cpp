@@ -19,15 +19,15 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   m_opGenerator = new OperatorGenerator(m_template);
   m_volGenerator = new VolumeGenerator();
   userPoints = new UserPoints(program);
-  S = 100;
+  S = 200;
 
   MatrixXf X = RowVectorXf::LinSpaced(S, MIN[0], MAX[0]).replicate(S, 1);
   MatrixXf Y = VectorXf::LinSpaced(S, MIN[1], MAX[1]).replicate(1, S);
 
-  circle1 = new Circle(0, -0.25, 0.25, 0.5, X, Y);
-  circle2 = new Circle(0, 0.25, 0.25, 0.5, X, Y);
+  circle1 = new Circle(0, -0.35, 0.25, 0.6, X, Y);
+  circle2 = new Circle(0, 0.35, 0.25, 0.6, X, Y);
 
-  result = new Result(X, Y, program);
+  //  result = new Result(X, Y, program);
   result3D = new Result3D(S, program);
 }
 
@@ -42,11 +42,17 @@ void Pipeline::initializeSpheres() {
 }
 
 void Pipeline::start() {
-  Tensor3f G = m_opGenerator->generateOperator(20);
+  long int before = mach_absolute_time();
+  Tensor3f G = m_opGenerator->generateOperator(50);
+  LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   initializeSpheres();
+  LOG("Step 2, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
+  LOG("Step 3, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
+  LOG("Step 4, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   result3D->setDistanceField(distanceField);
+  LOG("Step 5, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
 
   //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
   //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);

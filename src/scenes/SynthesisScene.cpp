@@ -6,25 +6,33 @@
 SynthesisScene::SynthesisScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
   this->m_program = program;
   this->m_pipeline = pipeline;
-//  grid = new Grid(3 * 44, m_program);
-  m_camera.setPosition(glm::vec3(0, 0, 2));
+  //  grid = new Grid(3 * 44, m_program);
+  m_camera.setPosition(glm::vec3(0, 0, 2.25));
 }
 
 SynthesisScene::~SynthesisScene() {}
 
 void SynthesisScene::render() {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
+  glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+  QVector3D lightPos = QVector3D(4, 4, 4);
+  m_program->setUniformValue("lightPosition_worldspace", lightPos);
+
+  QMatrix4x4 model;
+  QMatrix4x4 view = QMatrix4x4(glm::value_ptr(m_camera.view())).transposed();
+  QMatrix4x4 projection = QMatrix4x4(glm::value_ptr(m_camera.projection())).transposed();
+  QMatrix4x4 MVP = projection * view * model;
+
+  m_program->setUniformValue("MVP", MVP);
+  m_program->setUniformValue("view", view);
+  m_program->setUniformValue("projection", projection);
 
   if (m_pipeline->result3D->isSet) {
     m_pipeline->result3D->render();
   }
 
-//  if (m_pipeline->result->isSet) {
-//    m_pipeline->result->render();
-//  }
-
+  //  if (m_pipeline->result->isSet) {
+  //    m_pipeline->result->render();
+  //  }
 }
 
 void SynthesisScene::update() {

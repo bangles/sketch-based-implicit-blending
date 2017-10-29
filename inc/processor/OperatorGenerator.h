@@ -30,6 +30,7 @@ public:
   void fillGrid(int S, int sampleCount, int Nfactor, MatrixXf X, MatrixXf Y, VectorXf V, Tensor3f &G, Tensor3i &mask, Tensor3i &Gs);
   void fillSlice(int S, int sampleCount, int Nfactor, MatrixXf X, MatrixXf Y, float v, MatrixXf &out_G, MatrixXi &out_mask, MatrixXi &out_Gs);
   void solve(Tensor3f &G, Tensor3i &mask, int S);
+  void fillOnes(Tensor3f &G, Tensor3i &mask, int S);
   void print(MatrixXf matrix);
   void print(MatrixXi matrix);
   void print(vector<MatrixXf> matrix);

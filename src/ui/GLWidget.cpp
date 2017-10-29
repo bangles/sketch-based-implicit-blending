@@ -26,12 +26,6 @@ void GLWidget::initializeGL() {
   glShadeModel(GL_SMOOTH);
   glPointSize(8.0f);
 
-  //    glFrustum(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
-  //    glOrtho(0.0, (GLdouble) this->width(), 0.0, (GLdouble) this->height(), -1, 1);
-
-  static GLfloat lightPosition[4] = {0, 0, 10, 1.0};
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-
   m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
   m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");
   m_program.link();
@@ -132,11 +126,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
-    switch (state) {
-    case STATE_OBJECTS:
-      objectScene->handleMouseRelease();
-      break;
-    }
+  switch (state) {
+  case STATE_OBJECTS:
+    objectScene->handleMouseRelease();
+    break;
+  }
 }
 
 void GLWidget::printContextInformation() {
@@ -165,8 +159,26 @@ void GLWidget::printContextInformation() {
   qDebug() << qPrintable(glType) << qPrintable(glVersion) << "(" << qPrintable(glProfile) << ")";
 }
 
-void GLWidget::startTemplateScene() { state = STATE_TEMPLATE; }
+void GLWidget::startTemplateScene() {
+  m_program.removeAllShaders();
+  m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
+  m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");
+  m_program.link();
+  state = STATE_TEMPLATE;
+}
 
-void GLWidget::startObjectScene() { state = STATE_OBJECTS; }
+void GLWidget::startObjectScene() {
+  m_program.removeAllShaders();
+  m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
+  m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");
+  m_program.link();
+  state = STATE_OBJECTS;
+}
 
-void GLWidget::startSynthesisScene() { state = STATE_SYNTHESIS; }
+void GLWidget::startSynthesisScene() {
+  m_program.removeAllShaders();
+  m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs_synthesis.glsl");
+  m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs_synthesis.glsl");
+  m_program.link();
+  state = STATE_SYNTHESIS;
+}

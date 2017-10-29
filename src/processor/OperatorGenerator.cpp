@@ -45,73 +45,106 @@ Tensor3f OperatorGenerator::generateOperator(int S) {
           G(i, j, k) = 0;
 
         // Boundary conditions
-        if (i == 0) {
-          G(i, j, k) = 1.0 / (S - 1) * j;
-          mask(i, j, k) = 1;
-        }
+        //        if (i == 0) {
+        //          G(i, j, k) = 1.0 / (S - 1) * j;
+        //          mask(i, j, k) = 1;
+        //        }
 
-        if (j == 0) {
-          G(i, j, k) = 1.0 / (S - 1) * i;
-          mask(i, j, k) = 1;
-        }
+        //        if (j == 0) {
+        //          G(i, j, k) = 1.0 / (S - 1) * i;
+        //          mask(i, j, k) = 1;
+        //        }
 
-        if (i == (S - 1) || j == (S - 1)) {
+        //        if (i == (S - 1) || j == (S - 1)) {
+        //          G(i, j, k) = 1;
+        //          mask(i, j, k) = 1;
+        //        }
+
+        //        if (i == 1 && j > 0 && j < (S - 1)) {
+        //          G(i, j, k) = 1.0 / (S - 1) * j;
+        //          mask(i, j, k) = 1;
+        //        }
+
+        //        if (j == 1 && i > 0 && i < (S - 1)) {
+        //          G(i, j, k) = 1.0 / (S - 1) * i;
+        //          mask(i, j, k) = 1;
+        //        }
+
+        //        if (i == S - 2 && j > 0 && j < (S - 1)) {
+        //          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
+        //          mask(i, j, k) = 1;
+        //        }
+
+        //        if (j == S - 2 && i > 0 && i < (S - 1)) {
+        //          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
+        //          mask(i, j, k) = 1;
+        //        }
+      }
+    }
+  }
+
+  //  LOG("Starting solve");
+  //  long int before = mach_absolute_time();
+  //  solve(G, mask, S);
+  fillOnes(G, mask, S);
+
+  //  long int after = mach_absolute_time();
+  //  int elapsed = ((after - before) * 100) / (1000 * 1000 * 1000);
+
+  //  LOG("solve ended, Time taken " << elapsed / 100.0);
+  return G;
+}
+
+void OperatorGenerator::fillOnes(Tensor3f &G, Tensor3i &mask, int S) {
+  for (int k = 0; k < S; k++) {
+    for (int i = 0; i < S; i++) {
+      for (int j = S - 1; j >= 0; j--) {
+        if (!mask(i, j, k)) {
           G(i, j, k) = 1;
-          mask(i, j, k) = 1;
+        } else {
+          break;
         }
+      }
+    }
 
-        if (i == 1 && j > 0 && j < (S - 1)) {
-          G(i, j, k) = 1.0 / (S - 1) * j;
-          mask(i, j, k) = 1;
-        }
-
-        if (j == 1 && i > 0 && i < (S - 1)) {
-          G(i, j, k) = 1.0 / (S - 1) * i;
-          mask(i, j, k) = 1;
-        }
-
-        if (i == S - 2 && j > 0 && j < (S - 1)) {
-          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
-          mask(i, j, k) = 1;
-        }
-
-        if (j == S - 2 && i > 0 && i < (S - 1)) {
-          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
-          mask(i, j, k) = 1;
+    for (int i = 0; i < S; i++) {
+      for (int j = S - 1; j >= 0; j--) {
+        if (!mask(j, i, k)) {
+          G(j, i, k) = 1;
+        } else {
+          break;
         }
       }
     }
   }
 
-  LOG("Starting solve");
-  long int before = mach_absolute_time();
-  solve(G, mask, S);
-  long int after = mach_absolute_time();
-  int elapsed = ((after - before) * 100) / (1000 * 1000 * 1000);
+  VectorXi imid;
+  VectorXf r = VectorXf::LinSpaced(S, 0, 1);
 
-  LOG("solve ended, Time taken " << elapsed / 100.0);
+  if (S % 2 == 0) {
+    imid.resize(4);
+    imid << -2, -1, 0, 1;
+    imid = imid.array() + S / 2;
+  } else {
+    imid.resize(5);
+    imid << -3, -2, 1, 0, 1;
+    imid = imid.array() + (S + 1) / 2;
+  }
 
-  //  Tensor3f gG[2];
-  //  gG[0].resize(S, S, S);
-  //  gG[1].resize(S, S, S);
+  for (int k = 0; k < S; k++) {
+    for (int a = 0; a < imid.size(); a++) {
+      int imid_a = imid[a];
 
-  //  for (int i = 0; i < S; i++) {
-  //    for (int j = 0; j < S; j++) {
-  //      int index = 0;
-  //      for (; index < S - 1; index++) {
-  //        gG[0](j, index, i) = (G(j, index + 1, i) - G(j, index, i)) * (S - 1);
-  //        gG[1](index, j, i) = (G(index + 1, j, i) - G(index, j, i)) * (S - 1);
-  //      }
-  //      gG[0](j, index, i) = (G(j, index, i) - G(j, index - 1, i)) * (S - 1);
-  //      gG[1](index, j, i) = (G(index, j, i) - G(index - 1, j, i)) * (S - 1);
-  //    }
-  //  }
+      G(0, imid_a, k) = r[imid_a];
+      G(1, imid_a, k) = r[imid_a];
 
-  return G;
+      G(imid_a, 0, k) = r[imid_a];
+      G(imid_a, 1, k) = r[imid_a];
+    }
+  }
 }
 
 void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
-
   const int neighborhood[13] = {0, 1, -1, S, -S, -S - 1, S - 1, S + 1, -S + 1, 2, -2, 2 * S, -2 * S};
   const double kernel[13] = {20.0, -8.0, -8.0, -8.0, -8.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0};
 
@@ -147,7 +180,7 @@ void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
       }
     }
 
-    LOG(i);
+    //    LOG(i);
 
     //    solver.compute(L);
     L.makeCompressed();

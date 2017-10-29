@@ -32,25 +32,36 @@ void Result3D::polygonize(Tensor<float, 3> &df, float isoValue) {
   }
 
   igl::copyleft::marching_cubes(S, GV, res, res, res, vertices, faces);
+  igl::per_vertex_normals(vertices, faces, normals);
+  normals.transposeInPlace();
   vertices.transposeInPlace();
   faces.transposeInPlace();
 }
 
 void Result3D::initializeBuffers() {
-  m_vbo.create();
+  vertex_vbo.create();
   index_vbo.create();
+  normal_vbo.create();
   m_vao.create();
 }
 
 void Result3D::bindResult() {
-  m_vbo.bind();
-  m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vbo.allocate(vertices.data(), vertices.size() * sizeof(GL_FLOAT));
-
   m_vao.bind();
+
+  vertex_vbo.bind();
+  vertex_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  vertex_vbo.allocate(vertices.data(), vertices.size() * sizeof(GL_FLOAT));
   m_program->enableAttributeArray(0);
   m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
-  m_vbo.release();
+  vertex_vbo.release();
+
+  normal_vbo.bind();
+  normal_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  normal_vbo.allocate(normals.data(), normals.size() * sizeof(GL_FLOAT));
+  m_program->enableAttributeArray(1);
+  m_program->setAttributeBuffer(1, GL_FLOAT, 0, 3);
+  normal_vbo.release();
+
   m_vao.release();
 
   index_vbo.bind();
@@ -59,11 +70,10 @@ void Result3D::bindResult() {
   index_vbo.release();
 }
 
-GLfloat faceColor[4];
 void Result3D::render() {
-//    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, faceColor);
+  //    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, faceColor);
   m_vao.bind();
-  m_program->setUniformValue("color", QVector4D(0.0f, 1.0f, 0.5f, 0.7f));
+  m_program->setUniformValue("color", QVector3D(0.3f, 0.5f, 0.9f));
   index_vbo.bind();
   glDrawElements(GL_TRIANGLES, faces.size() * 6, GL_UNSIGNED_INT, 0);
 }
