@@ -21,9 +21,7 @@ void main()
 
     vec3 position_cameraspace = ( view * model * vec4(position_modelspace,1)).xyz;
     eyeDirection_cameraspace = vec3(0,0,0) - position_cameraspace;
-    vec3 lightPosition_cameraspace = ( view * model * vec4(lightPosition_worldspace,1)).xyz;
-    lightDirection_cameraspace = lightPosition_cameraspace + eyeDirection_cameraspace;
-    normal_cameraspace = ( view * model * vec4(normal_modelspace,0)).xyz;
-
-
+    vec3 lightPosition_cameraspace = ( view * vec4(lightPosition_worldspace,1)).xyz;
+    lightDirection_cameraspace = lightPosition_cameraspace - position_cameraspace;
+    normal_cameraspace = ( transpose(inverse(view * model)) * vec4(normal_modelspace,0)).xyz;
 }

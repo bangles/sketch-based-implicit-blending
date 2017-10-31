@@ -16,6 +16,7 @@ using namespace Eigen;
 static const int STATE_MOVE = 0;
 static const int STATE_SKETCH = 1;
 static const int STATE_MOVE_ACTIVATED = 2;
+static const int STATE_DEFAULT = 3;
 
 class ObjectScene {
 
@@ -26,10 +27,8 @@ private:
   QOpenGLBuffer m_vbo[4];
   QOpenGLVertexArrayObject m_vao[4];
   Circle *activatedCircle;
-  //  bool scribbling;
 
 public:
-  //  MatrixXf samples;
   vector<Vector2f> samples;
   int state;
 
@@ -45,6 +44,7 @@ public:
   void bindObject(int i, Circle *circle);
   void setState(int state);
   void addUserPoint(Vector2f point);
+  void clearUserPoints();
   void handleMouseDrag(QPoint point, float width, float height);
   void handleMouseClick(QPoint point, float width, float height);
   void handleMouseRelease();

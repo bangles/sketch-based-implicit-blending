@@ -29,6 +29,7 @@ public:
   ObjectScene *objectScene;
   TemplateScene *templateScene;
   SynthesisScene *synthesisScene;
+  QOpenGLShaderProgram m_program;
   GLWidget(QWidget *parent = 0);
   ~GLWidget();
   void initializeGL();
@@ -50,7 +51,6 @@ protected:
   void mouseMoveEvent(QMouseEvent *event);
 
 private:
-  QOpenGLShaderProgram m_program;
   void printContextInformation();
 };
 

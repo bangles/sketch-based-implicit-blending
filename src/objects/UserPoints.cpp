@@ -4,22 +4,12 @@
 //  Created by Ishmeet Singh Kohli on 13/07/17.
 
 #include "UserPoints.hpp"
-
 using namespace Eigen;
 
 UserPoints::UserPoints(QOpenGLShaderProgram *program) {
   this->m_program = program;
-//  m_userPoints = MatrixXf(3, NUM_OF_USER_POINTS);
-
-//  float RADIUS = 0.5f;
-
-//  for (int i = 0; i < NUM_OF_USER_POINTS; i++) {
-//    double angle_rad = 0.3 + 0.4 * PI * i / NUM_OF_USER_POINTS;
-//    m_userPoints.col(i) = Vector3f(RADIUS * std::sin(angle_rad), RADIUS * std::cos(angle_rad), 0.5f);
-//  }
   m_vbo.create();
   m_vao.create();
-//  bindPoints();
 }
 
 void UserPoints::bindPoints() {
@@ -40,6 +30,11 @@ void UserPoints::render() {
   m_program->setUniformValue("color", QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
   glDrawArrays(GL_POINTS, 0, m_userPoints.cols());
   m_vao.release();
+}
+
+void UserPoints::clear() {
+  m_userPoints.resize(0, 0);
+  m_vbo.allocate(0);
 }
 
 void UserPoints::setUserPoints(MatrixXf userPoints) {

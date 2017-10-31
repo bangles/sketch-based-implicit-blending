@@ -21,8 +21,8 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   userPoints = new UserPoints(program);
   S = 200;
 
-  MatrixXf X = RowVectorXf::LinSpaced(S, MIN[0], MAX[0]).replicate(S, 1);
-  MatrixXf Y = VectorXf::LinSpaced(S, MIN[1], MAX[1]).replicate(1, S);
+  MatrixXf X = RowVectorXf::LinSpaced(S, MIN[0] - 0.2, MAX[0] + 0.2).replicate(S, 1);
+  MatrixXf Y = VectorXf::LinSpaced(S, MIN[1] - 0.2, MAX[1] + 0.2).replicate(1, S);
 
   circle1 = new Circle(0, -0.35, 0.25, 0.6, X, Y);
   circle2 = new Circle(0, 0.35, 0.25, 0.6, X, Y);
@@ -41,7 +41,8 @@ void Pipeline::initializeSpheres() {
   sphere2 = new Sphere(circle2->center[0], circle2->center[1], 0, circle2->r1, circle2->r2, S);
 }
 
-void Pipeline::start() {
+void Pipeline::start(QOpenGLShaderProgram *program) {
+  result3D = new Result3D(S, program);
   long int before = mach_absolute_time();
   Tensor3f G = m_opGenerator->generateOperator(50);
   LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
@@ -98,4 +99,11 @@ Tensor<float, 3> Pipeline::calculateGradientAngles(Tensor<float, 3> (&g1)[3], Te
     }
   }
   return alpha;
+}
+
+void Pipeline::resetRegistration() {
+  this->m_template->setup();
+  this->userPoints->clear();
+  this->m_regProcessor->reset();
+  this->result3D->resetBuffers();
 }

@@ -17,11 +17,7 @@ Template::Template(QOpenGLShaderProgram *program) : index_vbo(QOpenGLBuffer::Ind
     mPatches[0].triangles = MatrixXi(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 2);
     mPatches[0].grid = VectorXi::LinSpaced(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,0,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS - 1);
     mPatches[0].grid.resize(NUM_CONTROL_POINTS, NUM_CONTROL_POINTS);
-    
-    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
-        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            mPatches[0].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(0.5f, j * 0.5f / (NUM_CONTROL_POINTS - 1), i * 1.0f / (NUM_CONTROL_POINTS - 1));
-    
+
     int count = 0;
     for (int a = 0; a < NUM_SAMPLES - 1; a++)
     {
@@ -47,16 +43,26 @@ Template::Template(QOpenGLShaderProgram *program) : index_vbo(QOpenGLBuffer::Ind
     mPatches[1].triangles = mPatches[0].triangles + (NUM_SAMPLES * NUM_SAMPLES * MatrixXi::Ones(3, (NUM_SAMPLES-1) * (NUM_SAMPLES-1) * 2));
     mPatches[1].grid = VectorXi::LinSpaced(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS,NUM_CONTROL_POINTS * NUM_CONTROL_POINTS, 2 * NUM_CONTROL_POINTS * NUM_CONTROL_POINTS - 1);
     mPatches[1].grid.resize(NUM_CONTROL_POINTS, NUM_CONTROL_POINTS);
-    
-    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
-        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
-            mPatches[1].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(j * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f, i * 1.0f / (NUM_CONTROL_POINTS - 1));
-    
+
     surface1 = new BSplineSurface(mPatches[0], BSPLINE_ORDER, NUM_CONTROL_POINTS);
     surface2 = new BSplineSurface(mPatches[1], BSPLINE_ORDER, NUM_CONTROL_POINTS);
     
-    processPoints();
     initializeBuffers();
+    setup();
+    processPoints();
+}
+
+void Template::setup(){
+    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
+        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
+            mPatches[0].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(0.5f, j * 0.5f / (NUM_CONTROL_POINTS - 1), i * 1.0f / (NUM_CONTROL_POINTS - 1));
+
+    for (int i = 0; i < NUM_CONTROL_POINTS; i++)
+        for (int j = 0; j < NUM_CONTROL_POINTS; j++)
+            mPatches[1].points.col(j + (NUM_CONTROL_POINTS * i)) = Vector3f(j * 0.5f / (NUM_CONTROL_POINTS - 1), 0.5f, i * 1.0f / (NUM_CONTROL_POINTS - 1));
+
+    surface1->evaluateSurface();
+    surface2->evaluateSurface();
     updateBuffers();
 }
 

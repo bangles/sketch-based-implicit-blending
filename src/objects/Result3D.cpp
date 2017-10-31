@@ -33,6 +33,7 @@ void Result3D::polygonize(Tensor<float, 3> &df, float isoValue) {
 
   igl::copyleft::marching_cubes(S, GV, res, res, res, vertices, faces);
   igl::per_vertex_normals(vertices, faces, normals);
+
   normals.transposeInPlace();
   vertices.transposeInPlace();
   faces.transposeInPlace();
@@ -45,18 +46,25 @@ void Result3D::initializeBuffers() {
   m_vao.create();
 }
 
+void Result3D::resetBuffers() {
+  m_vao.release();
+  vertex_vbo.allocate(0);
+  index_vbo.allocate(0);
+  normal_vbo.allocate(0);
+}
+
 void Result3D::bindResult() {
   m_vao.bind();
 
   vertex_vbo.bind();
-  vertex_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  vertex_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
   vertex_vbo.allocate(vertices.data(), vertices.size() * sizeof(GL_FLOAT));
   m_program->enableAttributeArray(0);
   m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
   vertex_vbo.release();
 
   normal_vbo.bind();
-  normal_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  normal_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
   normal_vbo.allocate(normals.data(), normals.size() * sizeof(GL_FLOAT));
   m_program->enableAttributeArray(1);
   m_program->setAttributeBuffer(1, GL_FLOAT, 0, 3);
@@ -65,7 +73,7 @@ void Result3D::bindResult() {
   m_vao.release();
 
   index_vbo.bind();
-  index_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  index_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
   index_vbo.allocate(faces.data(), faces.size() * sizeof(GLuint));
   index_vbo.release();
 }

@@ -8,47 +8,47 @@
 
 #include "BSplineSurface.hpp"
 #include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
 
 static const int NUM_CONTROL_POINTS = 5;
 static const int BSPLINE_ORDER = 3;
 
-struct MeshInfo{
-    VectorXi line0;
-    VectorXi line1;
+struct MeshInfo {
+  VectorXi line0;
+  VectorXi line1;
 
-    VectorXi spine0;
-    VectorXi spine1;
+  VectorXi spine0;
+  VectorXi spine1;
 
-    VectorXi line0o;
-    VectorXi line1o;
+  VectorXi line0o;
+  VectorXi line1o;
 
-    MatrixXi slices;
+  MatrixXi slices;
 };
 
 class Template {
 private:
-//    GLuint gVBO[5];
-    QOpenGLBuffer index_vbo;
-    QOpenGLBuffer m_vbo[3];
-    QOpenGLVertexArrayObject m_vao[3];
-    QOpenGLShaderProgram* m_program;
-    BSplineSurface *surface1, *surface2;
+  //    GLuint gVBO[5];
+  QOpenGLBuffer index_vbo;
+  QOpenGLBuffer m_vbo[3];
+  QOpenGLVertexArrayObject m_vao[3];
+  QOpenGLShaderProgram *m_program;
+  BSplineSurface *surface1, *surface2;
 
 public:
-    Template(QOpenGLShaderProgram *program);
-    ~Template();
+  Template(QOpenGLShaderProgram *program);
+  ~Template();
 
-    Patch mPatches[2];
-    MeshInfo meshInfo;
-    void evaluate(float u, float v, bool isPatch1, Vector3f &point);
-    void render();
-    void updatePatches();
-    void processPoints();
-    void initializeBuffers();
-    void updateBuffers();
+  Patch mPatches[2];
+  MeshInfo meshInfo;
+  void setup();
+  void evaluate(float u, float v, bool isPatch1, Vector3f &point);
+  void render();
+  void updatePatches();
+  void processPoints();
+  void initializeBuffers();
+  void updateBuffers();
 };
-
 
 #endif /* Template_hpp */

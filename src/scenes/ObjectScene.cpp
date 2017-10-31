@@ -5,7 +5,7 @@
 ObjectScene::ObjectScene(QOpenGLShaderProgram *program, Pipeline *pipeline) {
   this->m_program = program;
   this->m_pipeline = pipeline;
-  //  this->state = STATE_CAMERA;
+  this->state = STATE_DEFAULT;
 
   initializeBuffers();
   initializeBoundary();
@@ -31,7 +31,7 @@ void ObjectScene::initializeBoundary() {
 
 void ObjectScene::render() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-//  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  //  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   m_program->setUniformValue("camera", QMatrix4x4());
 
   m_vao[0].bind();
@@ -100,7 +100,10 @@ void ObjectScene::setState(int state) {
     QApplication::setOverrideCursor(Qt::SizeAllCursor);
     break;
   case STATE_SKETCH:
-    QApplication::setOverrideCursor(Qt::PointingHandCursor);
+    QApplication::setOverrideCursor(Qt::CrossCursor);
+    break;
+  case STATE_DEFAULT:
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
     break;
   }
 }
@@ -117,6 +120,11 @@ void ObjectScene::addUserPoint(Vector2f point) {
   m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
   m_vbo[3].release();
   m_vao[3].release();
+}
+
+void ObjectScene::clearUserPoints() {
+  samples.clear();
+  m_vbo[3].allocate(0);
 }
 
 void ObjectScene::handleMouseClick(QPoint point, float width, float height) {

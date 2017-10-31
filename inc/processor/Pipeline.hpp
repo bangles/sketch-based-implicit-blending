@@ -43,7 +43,8 @@ public:
     Tensor<float,3> calculateGradientAngles(Tensor<float,3> (&g1)[3], Tensor<float,3> (&g2)[3]);
     void initializeSpheres();
     void registerPoints();
-    void start();
+    void resetRegistration();
+    void start(QOpenGLShaderProgram *program);
 };
 
 

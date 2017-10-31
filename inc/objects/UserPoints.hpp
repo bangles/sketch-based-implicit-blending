@@ -28,6 +28,7 @@ public:
     ~UserPoints();
     MatrixXf m_userPoints;
     void render();
+    void clear();
     void bindPoints();
     void setUserPoints(MatrixXf userPoints);
 };

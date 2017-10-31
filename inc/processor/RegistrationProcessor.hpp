@@ -59,6 +59,7 @@ public:
     void laplacianLineEnergy(MatrixXf& A, VectorXf& b);
     void fixedPointEnergy(MatrixXf& A, VectorXf& b);
     void initialize();
+    void reset();
 };
 
 #endif /* RegistrationProcessor_h */

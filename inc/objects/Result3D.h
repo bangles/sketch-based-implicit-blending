@@ -32,6 +32,7 @@ public:
   void setDistanceField(Tensor<float, 3> &df);
   void polygonize(Tensor<float, 3> &df, float isoValue);
   void initializeBuffers();
+  void resetBuffers();
   void bindResult();
   void render();
 };

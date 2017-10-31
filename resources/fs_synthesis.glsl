@@ -19,7 +19,7 @@ void main()
     float LightPower = 50.0f;
 
     vec3 MaterialDiffuseColor = color;
-    vec3 MaterialAmbientColor = vec3(0.3,0.3,0.3) * MaterialDiffuseColor;
+    vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
     vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);
 
     float distance = length( lightPosition_worldspace - position_worldspace );
@@ -31,7 +31,8 @@ void main()
     // Eye vector (towards the camera)
     vec3 E = normalize(eyeDirection_cameraspace);
     // Direction in which the triangle reflects the light
-    vec3 R = reflect(-l,n);
+    vec3 R = normalize(-reflect(l,n));
+
     float cosAlpha = clamp( dot( E,R ), 0,1 );
 
     vec3 tempColor =

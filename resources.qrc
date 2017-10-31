@@ -6,5 +6,7 @@
         <file>resources/brush.png</file>
         <file>resources/fs_synthesis.glsl</file>
         <file>resources/vs_synthesis.glsl</file>
+        <file>resources/cursor.png</file>
+        <file>resources/forbidden.png</file>
     </qresource>
 </RCC>

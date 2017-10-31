@@ -49,6 +49,11 @@ void RegistrationProcessor::updateSearcher() {
   searcher->build(_vertices, _triangles);
 }
 
+void RegistrationProcessor::reset() {
+    iter = 0;
+    updateSearcher();
+}
+
 void RegistrationProcessor::registerPoints(MatrixXf inQueries) {
   //  while (iter < 10) {
   MatrixXf x = step(inQueries);
@@ -68,7 +73,7 @@ MatrixXf RegistrationProcessor::step(MatrixXf inQueries) {
 
   int n = inQueries.cols();
   VectorXf w = VectorXf::Zero(7);
-  w(0) = 1.0 / n;
+  w(0) = 1.0 / n;                                   // Point to plane
   w(1) = max(1000 * pow(0.05f, iter), pow(10, -3)); // Slice smoothness
   w(2) = max(1000 * pow(0.05f, iter), pow(10, -3)); // Line smoothness
   w(3) = pow(10, -3);                               // Tikhonov

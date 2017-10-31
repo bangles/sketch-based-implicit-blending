@@ -45,48 +45,48 @@ Tensor3f OperatorGenerator::generateOperator(int S) {
           G(i, j, k) = 0;
 
         // Boundary conditions
-        //        if (i == 0) {
-        //          G(i, j, k) = 1.0 / (S - 1) * j;
-        //          mask(i, j, k) = 1;
-        //        }
+        if (i == 0) {
+          G(i, j, k) = 1.0 / (S - 1) * j;
+          mask(i, j, k) = 1;
+        }
 
-        //        if (j == 0) {
-        //          G(i, j, k) = 1.0 / (S - 1) * i;
-        //          mask(i, j, k) = 1;
-        //        }
+        if (j == 0) {
+          G(i, j, k) = 1.0 / (S - 1) * i;
+          mask(i, j, k) = 1;
+        }
 
-        //        if (i == (S - 1) || j == (S - 1)) {
-        //          G(i, j, k) = 1;
-        //          mask(i, j, k) = 1;
-        //        }
+        if (i == (S - 1) || j == (S - 1)) {
+          G(i, j, k) = 1;
+          mask(i, j, k) = 1;
+        }
 
-        //        if (i == 1 && j > 0 && j < (S - 1)) {
-        //          G(i, j, k) = 1.0 / (S - 1) * j;
-        //          mask(i, j, k) = 1;
-        //        }
+        if (i == 1 && j > 0 && j < (S - 1)) {
+          G(i, j, k) = 1.0 / (S - 1) * j;
+          mask(i, j, k) = 1;
+        }
 
-        //        if (j == 1 && i > 0 && i < (S - 1)) {
-        //          G(i, j, k) = 1.0 / (S - 1) * i;
-        //          mask(i, j, k) = 1;
-        //        }
+        if (j == 1 && i > 0 && i < (S - 1)) {
+          G(i, j, k) = 1.0 / (S - 1) * i;
+          mask(i, j, k) = 1;
+        }
 
-        //        if (i == S - 2 && j > 0 && j < (S - 1)) {
-        //          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
-        //          mask(i, j, k) = 1;
-        //        }
+        if (i == S - 2 && j > 0 && j < (S - 1)) {
+          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
+          mask(i, j, k) = 1;
+        }
 
-        //        if (j == S - 2 && i > 0 && i < (S - 1)) {
-        //          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
-        //          mask(i, j, k) = 1;
-        //        }
+        if (j == S - 2 && i > 0 && i < (S - 1)) {
+          G(i, j, k) = 1.0 / (S - 1) * (S - 2);
+          mask(i, j, k) = 1;
+        }
       }
     }
   }
 
   //  LOG("Starting solve");
   //  long int before = mach_absolute_time();
-  //  solve(G, mask, S);
-  fillOnes(G, mask, S);
+  solve(G, mask, S);
+//  fillOnes(G, mask, S);
 
   //  long int after = mach_absolute_time();
   //  int elapsed = ((after - before) * 100) / (1000 * 1000 * 1000);
