@@ -22,6 +22,9 @@ void SynthesisScene::render() {
   QMatrix4x4 projection = QMatrix4x4(glm::value_ptr(m_camera.projection())).transposed();
   QMatrix4x4 MVP = projection * view * model;
 
+
+  m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
+
   m_program->setUniformValue("MVP", MVP);
   m_program->setUniformValue("view", view);
   m_program->setUniformValue("projection", projection);

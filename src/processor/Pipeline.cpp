@@ -1,8 +1,6 @@
 //  Pipeline.cpp
 //  ebib_demo
-//
 //  Created by Ishmeet Singh Kohli on 06/09/17.
-//
 //
 
 #include "Utils.h"
@@ -19,7 +17,7 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   m_opGenerator = new OperatorGenerator(m_template);
   m_volGenerator = new VolumeGenerator();
   userPoints = new UserPoints(program);
-  S = 200;
+  S = 100;
 
   MatrixXf X = RowVectorXf::LinSpaced(S, MIN[0] - 0.2, MAX[0] + 0.2).replicate(S, 1);
   MatrixXf Y = VectorXf::LinSpaced(S, MIN[1] - 0.2, MAX[1] + 0.2).replicate(1, S);
