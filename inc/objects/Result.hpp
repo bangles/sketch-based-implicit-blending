@@ -2,7 +2,7 @@
 #define Result_H
 
 #include <Eigen/Dense>
-#include <MarchingSquares.h>
+#include <MarchingSquares.hpp>
 #include <igl/copyleft/marching_cubes.h>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>

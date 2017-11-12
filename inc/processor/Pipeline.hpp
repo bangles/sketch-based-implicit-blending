@@ -10,16 +10,16 @@
 #define Pipeline_h
 
 #include "RegistrationProcessor.hpp"
-#include "OperatorGenerator.h"
-#include "VolumeGenerator.h"
+#include "OperatorGenerator.hpp"
+#include "VolumeGenerator.hpp"
 #include <igl/floor.h>
 #include <algorithm>
 #include <eigen3/unsupported/Eigen/CXX11/Tensor>
 #include <UserPoints.hpp>
-#include "circle.h"
-#include "sphere.h"
-#include "Result.h"
-#include "Result3D.h"
+#include "circle.hpp"
+#include "sphere.hpp"
+#include "Result.hpp"
+#include "Result3D.hpp"
 
 class Pipeline {
 private:

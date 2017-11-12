@@ -2,5 +2,5 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 HEADERS +=  \
-    $$PWD/mainwindow.h \
-    $$PWD/GLWidget.h
+    $$PWD/mainwindow.hpp \
+    $$PWD/GLWidget.hpp

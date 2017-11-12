@@ -9,9 +9,9 @@
 #ifndef RegistrationProcessor_h
 #define RegistrationProcessor_h
 
-#include "nnsearch.h"
+#include "nnsearch.hpp"
 #include "Template.hpp"
-#include "Utils.h"
+#include "Utils.hpp"
 #include <igl/ismember.h>
 #include <igl/sort.h>
 #include <igl/slice.h>

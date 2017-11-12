@@ -1,4 +1,4 @@
-#include "MarchingSquares.h"
+#include "MarchingSquares.hpp"
 
 namespace {
 Eigen::Vector2d lerpVertex(const Eigen::Vector2d &p1, const Eigen::Vector2d &p2, double v1, double v2, double isovalue) {

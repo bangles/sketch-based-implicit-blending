@@ -6,7 +6,7 @@ HEADERS +=  \
     $$PWD/BSplineSurface.hpp \
     $$PWD/Template.hpp \
     $$PWD/UserPoints.hpp \
-    $$PWD/circle.h \
-    $$PWD/Result.h \
-    $$PWD/sphere.h \
-    $$PWD/Result3D.h
+    $$PWD/circle.hpp \
+    $$PWD/Result.hpp \
+    $$PWD/Result3D.hpp \
+    $$PWD/sphere.hpp

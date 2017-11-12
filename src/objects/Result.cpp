@@ -1,4 +1,4 @@
-#include "Result.h"
+#include "Result.hpp"
 #include <iostream>
 
 #define LOG(x) std::cout << x << std::endl

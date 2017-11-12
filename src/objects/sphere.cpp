@@ -1,5 +1,5 @@
-#include "sphere.h"
-#include "VolumeGenerator.h"
+#include "sphere.hpp"
+#include "VolumeGenerator.hpp"
 #include <iostream>
 
 #define LOG(x) std::cout << x << std::endl

@@ -1,7 +1,7 @@
 #ifndef OPERATORGENERATOR_H
 #define OPERATORGENERATOR_H
 
-#include "Utils.h"
+#include "Utils.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>

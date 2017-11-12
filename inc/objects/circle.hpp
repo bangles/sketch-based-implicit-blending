@@ -2,7 +2,7 @@
 #define CIRCLE_H
 
 #include <Eigen/Dense>
-#include <MarchingSquares.h>
+#include <MarchingSquares.hpp>
 #include <igl/copyleft/marching_cubes.h>
 #include <igl/unique.h>
 #include <eigen3/unsupported/Eigen/CXX11/Tensor>

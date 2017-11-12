@@ -1,5 +1,5 @@
-#include "OperatorGenerator.h"
-#include "Utils.h"
+#include "OperatorGenerator.hpp"
+#include "Utils.hpp"
 #include <Eigen/IterativeLinearSolvers>
 #include <unsupported/Eigen/SparseExtra>
 
@@ -153,9 +153,6 @@ void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
 
   SpMat L(S * S, S * S);
   SparseLU<SpMat> solver;
-  //  LeastSquaresConjugateGradient<SpMat> solver;
-  //    ConjugateGradient<SpMat> solver;
-  //    BiCGSTAB<SpMat> solver;
 
   vector<ETriplet> tripletList;
 
@@ -180,9 +177,6 @@ void OperatorGenerator::solve(Tensor3f &G, Tensor3i &mask, int S) {
       }
     }
 
-    //    LOG(i);
-
-    //    solver.compute(L);
     L.makeCompressed();
     L.setFromTriplets(tripletList.begin(), tripletList.end());
     solver.compute(L);
@@ -251,10 +245,6 @@ void OperatorGenerator::fillSlice(int S, int sampleCount, int Nfactor, MatrixXf 
   for (int k = 0; k < sampleCount; k++) {
     Vector2f p = sp_2d.row(k);
     Vector2f n = sn2.row(k);
-
-    //      TODO : Implement Hard Constraints and remove this
-    //        p[0] = roundf(p[0] * 1000000) / 1000000.0;
-    //        p[1] = roundf(p[1] * 1000000) / 1000000.0;
 
     Vector2i pc;
     Vector2f tmp = p.reverse() * (S - 1);

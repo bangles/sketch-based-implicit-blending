@@ -4,12 +4,12 @@
 
 #include "Grid.hpp"
 #include "Pipeline.hpp"
-#include "Camera.h"
+#include "Camera.hpp"
 #include <Eigen/Dense>
 #include <string>
 #include <stdio.h>
 #include <QOpenGLShaderProgram>
-#include "input.h"
+#include "input.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <QCursor>
 #include <QApplication>

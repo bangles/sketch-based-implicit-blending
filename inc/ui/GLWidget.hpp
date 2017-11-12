@@ -4,8 +4,8 @@
 #include "ObjectScene.hpp"
 #include "SynthesisScene.hpp"
 #include "TemplateScene.hpp"
-#include "input.h"
-#include "Utils.h"
+#include "input.hpp"
+#include "Utils.hpp"
 #include <GL.h>
 #include <QApplication>
 #include <QMatrix4x4>

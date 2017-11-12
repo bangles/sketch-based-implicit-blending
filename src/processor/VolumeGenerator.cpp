@@ -1,4 +1,4 @@
-#include "VolumeGenerator.h"
+#include "VolumeGenerator.hpp"
 
 VolumeGenerator::VolumeGenerator() {}
 

@@ -141,6 +141,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_4">
+        <property name="text">
+         <string>Automate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
          <string>Close</string>

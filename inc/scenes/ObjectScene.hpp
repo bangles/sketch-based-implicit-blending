@@ -1,14 +1,14 @@
 #ifndef ObjectScene_hpp
 #define ObjectScene_hpp
 
-#include "input.h"
+#include "input.hpp"
 #include <Eigen/Dense>
 #include <Pipeline.hpp>
 #include <QApplication>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
-#include <circle.h>
+#include <circle.hpp>
 #include <math.h>
 
 using namespace Eigen;

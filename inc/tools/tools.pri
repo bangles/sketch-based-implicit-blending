@@ -2,8 +2,8 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 HEADERS +=  \
-    $$PWD/Camera.h \
-    $$PWD/Utils.h \
-    $$PWD/nnsearch.h \
-    $$PWD/input.h \
-    $$PWD/MarchingSquares.h
+    $$PWD/Utils.hpp \
+    $$PWD/input.hpp \
+    $$PWD/Camera.hpp \
+    $$PWD/nnsearch.hpp \
+    $$PWD/MarchingSquares.hpp

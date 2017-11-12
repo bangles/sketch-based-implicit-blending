@@ -1,4 +1,4 @@
-#include "GLWidget.h"
+#include "GLWidget.hpp"
 #include <QDebug>
 #include <QKeyEvent>
 #include <QString>

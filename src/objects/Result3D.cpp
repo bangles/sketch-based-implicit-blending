@@ -1,5 +1,5 @@
-#include "Result3D.h"
-#include "VolumeGenerator.h"
+#include "Result3D.hpp"
+#include "VolumeGenerator.hpp"
 #include <iostream>
 
 #define LOG(x) std::cout << x << std::endl
