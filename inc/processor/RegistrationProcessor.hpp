@@ -44,7 +44,8 @@ private:
 public:
     RegistrationProcessor(Template *inTemplate);
     ~RegistrationProcessor();
-    void registerPoints(MatrixXf inQueries);
+    bool registerPoints(MatrixXf& inQueries);
+    void automaticRegisteration(MatrixXf& inQueries);
     MatrixXf step(MatrixXf inQueries);
     void push(MatrixXi& MC, int& lastRow, VectorXi a, VectorXi b);
     void push(MatrixXi& MC, int& lastRow, int a, int b);

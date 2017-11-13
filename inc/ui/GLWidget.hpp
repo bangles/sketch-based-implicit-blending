@@ -17,14 +17,14 @@
 #include <QWidget>
 #include <glu.h>
 
-static const int STATE_TEMPLATE = 0;
-static const int STATE_OBJECTS = 1;
-static const int STATE_SYNTHESIS = 2;
+static const int STATE_SYNTHESIS = 0;
+static const int STATE_TEMPLATE = 1;
+static const int STATE_OBJECTS = 2;
 
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
   Q_OBJECT
 public:
-  int state = 0;
+  int state = 2;
   Pipeline *m_pipeline;
   ObjectScene *objectScene;
   TemplateScene *templateScene;

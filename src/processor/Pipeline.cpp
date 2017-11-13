@@ -29,36 +29,12 @@ Pipeline::Pipeline(QOpenGLShaderProgram *program) {
   result3D = new Result3D(S, program);
 }
 
-void Pipeline::registerPoints() {
-  m_regProcessor->registerPoints(userPoints->m_userPoints);
-  m_template->updatePatches();
-}
-
 void Pipeline::initializeSpheres() {
   sphere1 = new Sphere(circle1->center[0], circle1->center[1], 0, circle1->r1, circle1->r2, S);
   sphere2 = new Sphere(circle2->center[0], circle2->center[1], 0, circle2->r1, circle2->r2, S);
 }
 
-void Pipeline::start(QOpenGLShaderProgram *program) {
-  result3D = new Result3D(S, program);
-  long int before = mach_absolute_time();
-  Tensor3f G = m_opGenerator->generateOperator(50);
-  LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
-  initializeSpheres();
-  LOG("Step 2, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
-  Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
-  LOG("Step 3, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
-  Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
-  LOG("Step 4, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
-  result3D->setDistanceField(distanceField);
-  LOG("Step 5, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
-
-  //  MatrixXf alpha = calculateGradientAngles(circle1->gradient, circle2->gradient);
-  //  MatrixXf distanceField = m_volGenerator->generate(circle1->distanceField, circle2->distanceField, alpha, G);
-  //  result->setDistanceField(distanceField);
-}
-
-void Pipeline::mapSamplesToTemplate(vector<Vector2f> sampleVector) {
+void Pipeline::map(vector<Vector2f>& sampleVector) {
   Map<MatrixXf> samples(sampleVector.data()->data(), 2, sampleVector.size());
 
   MatrixXf f1, f2, g1[2], g2[2];
@@ -73,6 +49,31 @@ void Pipeline::mapSamplesToTemplate(vector<Vector2f> sampleVector) {
   templatePoints.row(1) = f2;
   templatePoints.row(2) = alpha;
   userPoints->setUserPoints(templatePoints);
+}
+
+void Pipeline::registerPoints() {
+  m_regProcessor->registerPoints(userPoints->m_userPoints);
+}
+
+void Pipeline::generate(QOpenGLShaderProgram *program) {
+  result3D = new Result3D(S, program);
+  long int before = mach_absolute_time();
+  Tensor3f G = m_opGenerator->generateOperator(50);
+  LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  initializeSpheres();
+  LOG("Step 2, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
+  LOG("Step 3, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
+  LOG("Step 4, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  result3D->setDistanceField(distanceField);
+  LOG("Step 5, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+}
+
+void Pipeline::automate(vector<Vector2f>& sampleVector,QOpenGLShaderProgram *program) {
+    map(sampleVector);
+    m_regProcessor->automaticRegisteration(userPoints->m_userPoints);
+    generate(program);
 }
 
 MatrixXf Pipeline::calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2]) {

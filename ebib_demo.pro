@@ -33,6 +33,5 @@ QMAKE_CXXFLAGS += -std=c++11
 QMAKE_CXXFLAGS += -mmacosx-version-min=10.9
 QMAKE_LFLAGS += -mmacosx-version-min=10.9
 
-DISTFILES += \
-    classdiagram.qmodel
+DISTFILES +=
 

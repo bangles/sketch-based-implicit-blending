@@ -1,6 +1,5 @@
 //  RegistrationProcessor.cpp
 //  ebib_demo
-//
 //  Created by Ishmeet Singh Kohli on 18/07/17.
 
 #include "RegistrationProcessor.hpp"
@@ -23,22 +22,22 @@ RegistrationProcessor::RegistrationProcessor(Template *inTemplate) {
   initialize();
 }
 
-void RegistrationProcessor::initialize(){
-    MC = mergedDOFs();
-    R = MatrixXf::Identity(_points.size(), _points.size());
+void RegistrationProcessor::initialize() {
+  MC = mergedDOFs();
+  R = MatrixXf::Identity(_points.size(), _points.size());
 
-    if (MC.size() != 0) {
-      for (int i = 0; i < MC.rows(); i++) {
-        R(MC(i, 1), MC(i, 0)) = 1;
-      }
-
-      removeColumns(R, MC.col(1));
+  if (MC.size() != 0) {
+    for (int i = 0; i < MC.rows(); i++) {
+      R(MC(i, 1), MC(i, 0)) = 1;
     }
 
-    laplacianSliceEnergy(A1, b1);
-    laplacianLineEnergy(A2, b2);
-    fixedPointEnergy(A4, b4);
-    spineSmoothEnergy(A6, b6);
+    removeColumns(R, MC.col(1));
+  }
+
+  laplacianSliceEnergy(A1, b1);
+  laplacianLineEnergy(A2, b2);
+  fixedPointEnergy(A4, b4);
+  spineSmoothEnergy(A6, b6);
 }
 
 void RegistrationProcessor::updateSearcher() {
@@ -50,21 +49,36 @@ void RegistrationProcessor::updateSearcher() {
 }
 
 void RegistrationProcessor::reset() {
-    iter = 0;
-    updateSearcher();
+  iter = 0;
+  updateSearcher();
 }
 
-void RegistrationProcessor::registerPoints(MatrixXf inQueries) {
-  //  while (iter < 10) {
+bool RegistrationProcessor::registerPoints(MatrixXf &inQueries) {
+  MatrixXf beforePatches(m_template->mPatches[0].points.rows(), m_template->mPatches[0].points.cols() * 2);
+  beforePatches << m_template->mPatches[0].points, m_template->mPatches[1].points;
+
   MatrixXf x = step(inQueries);
   Map<Matrix<float, Dynamic, Dynamic, RowMajor>> solution(x.data(), 3, x.size() / 3);
-
   m_template->mPatches[0].points = solution.leftCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
   m_template->mPatches[1].points = solution.rightCols(NUM_CONTROL_POINTS * NUM_CONTROL_POINTS);
   updateSearcher();
+  m_template->updatePatches();
   iter++;
-  //  }
-  //  iter = 0;
+
+  if (iter > 20 && (beforePatches - solution).norm() < pow(10, -4)) {
+    return false;
+  }
+
+  return true;
+}
+
+void RegistrationProcessor::automaticRegisteration(MatrixXf &inQueries) {
+  while (true) {
+    if (!registerPoints(inQueries)) {
+      break;
+    }
+  }
+  iter = 0;
 }
 
 MatrixXf RegistrationProcessor::step(MatrixXf inQueries) {
