@@ -85,8 +85,8 @@ Tensor3f OperatorGenerator::generateOperator(int S) {
 
   //  LOG("Starting solve");
   //  long int before = mach_absolute_time();
-//  solve(G, mask, S);
-  fillOnes(G, mask, S);
+  solve(G, mask, S);
+  //  fillOnes(G, mask, S);
 
   //  long int after = mach_absolute_time();
   //  int elapsed = ((after - before) * 100) / (1000 * 1000 * 1000);

@@ -18,7 +18,7 @@ void SynthesisScene::render() {
   m_program->setUniformValue("lightPosition_worldspace", lightPos);
 
 //  QMatrix4x4 model;
-//  QMatrix4x4 view = QMatrix4x4(glm::value_ptr(m_camera.view())).transposed();
+  QMatrix4x4 view = QMatrix4x4(glm::value_ptr(m_camera.view())).transposed();
 //  QMatrix4x4 projection = QMatrix4x4(glm::value_ptr(m_camera.projection())).transposed();
 //  QMatrix4x4 MVP = projection * view * model;
 
@@ -26,7 +26,7 @@ void SynthesisScene::render() {
   m_program->setUniformValue("camera", QMatrix4x4(glm::value_ptr(m_camera.matrix())).transposed());
 
 //  m_program->setUniformValue("MVP", MVP);
-//  m_program->setUniformValue("view", view);
+  m_program->setUniformValue("view", view);
 //  m_program->setUniformValue("projection", projection);
 
   if (m_pipeline->result3D->isSet) {

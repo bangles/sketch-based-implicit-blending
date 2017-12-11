@@ -24,7 +24,8 @@ void GLWidget::initializeGL() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //  glShadeModel(GL_SMOOTH);
-  glPointSize(8.0f);
+//  glPointSize(3.0f);
+  glPointSize(7.0f);
 
   m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/resources/vs.glsl");
   m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/resources/fs.glsl");

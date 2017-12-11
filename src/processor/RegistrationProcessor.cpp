@@ -72,7 +72,7 @@ bool RegistrationProcessor::registerPoints(MatrixXf &inQueries) {
   return true;
 }
 
-void RegistrationProcessor::automaticRegisteration(MatrixXf &inQueries) {
+void RegistrationProcessor::automaticRegistration(MatrixXf &inQueries) {
   while (true) {
     if (!registerPoints(inQueries)) {
       break;

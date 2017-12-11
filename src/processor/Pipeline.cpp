@@ -34,17 +34,17 @@ void Pipeline::initializeSpheres() {
   sphere2 = new Sphere(circle2->center[0], circle2->center[1], 0, circle2->r1, circle2->r2, S);
 }
 
-void Pipeline::map(vector<Vector2f>& sampleVector) {
-  Map<MatrixXf> samples(sampleVector.data()->data(), 2, sampleVector.size());
+void Pipeline::map(vector<Vector2f> &samples) {
+  Map<MatrixXf> samples_eigen(samples.data()->data(), 2, samples.size());
 
   MatrixXf f1, f2, g1[2], g2[2];
-  MatrixXf X = samples.row(0);
-  MatrixXf Y = samples.row(1);
+  MatrixXf X = samples_eigen.row(0);
+  MatrixXf Y = samples_eigen.row(1);
 
   circle1->calculateDistanceField(X, Y, f1, g1);
   circle2->calculateDistanceField(X, Y, f2, g2);
   MatrixXf alpha = calculateGradientAngles(g1, g2);
-  MatrixXf templatePoints(3, samples.cols());
+  MatrixXf templatePoints(3, samples_eigen.cols());
   templatePoints.row(0) = f1;
   templatePoints.row(1) = f2;
   templatePoints.row(2) = alpha;
@@ -52,28 +52,32 @@ void Pipeline::map(vector<Vector2f>& sampleVector) {
 }
 
 void Pipeline::registerPoints() {
-  m_regProcessor->registerPoints(userPoints->m_userPoints);
+  MatrixXf processedSamples = preprocessSamples(userPoints->m_userPoints);
+  m_regProcessor->registerPoints(processedSamples);
 }
 
 void Pipeline::generate(QOpenGLShaderProgram *program) {
   result3D = new Result3D(S, program);
-  long int before = mach_absolute_time();
+//  long int before = mach_absolute_time();
   Tensor3f G = m_opGenerator->generateOperator(50);
-  LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  //  LOG("Step 1, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   initializeSpheres();
-  LOG("Step 2, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  //  LOG("Step 2, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   Tensor3f alpha = calculateGradientAngles(sphere1->gradient, sphere2->gradient);
-  LOG("Step 3, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  //  LOG("Step 3, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   Tensor3f distanceField = m_volGenerator->generate(sphere1->distanceField, sphere2->distanceField, alpha, G);
-  LOG("Step 4, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+  //  LOG("Step 4, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
   result3D->setDistanceField(distanceField);
-  LOG("Step 5, Time taken " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
+//  LOG("Time taken for generation : " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
 }
 
-void Pipeline::automate(vector<Vector2f>& sampleVector,QOpenGLShaderProgram *program) {
-    map(sampleVector);
-    m_regProcessor->automaticRegisteration(userPoints->m_userPoints);
-    generate(program);
+void Pipeline::automate(vector<Vector2f> &samples, QOpenGLShaderProgram *program) {
+  long int before = mach_absolute_time();
+  map(samples);
+  MatrixXf processedSamples = preprocessSamples(userPoints->m_userPoints);
+  m_regProcessor->automaticRegistration(processedSamples);
+  generate(program);
+  LOG("Total time taken : " << ((mach_absolute_time() - before) * 100) / (1000 * 1000 * 1000) / 100.0);
 }
 
 MatrixXf Pipeline::calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2]) {
@@ -98,6 +102,17 @@ Tensor<float, 3> Pipeline::calculateGradientAngles(Tensor<float, 3> (&g1)[3], Te
     }
   }
   return alpha;
+}
+
+MatrixXf Pipeline::preprocessSamples(MatrixXf& samples) {
+  if(samples.size() == 0) {
+    return samples;
+  }
+
+  float threshold = 0.05;
+  MatrixXf processed = igl::slice_mask(samples, samples.row(0).array() > threshold, 2);
+  processed = igl::slice_mask(processed, processed.row(1).array() > threshold, 2);
+  return processed;
 }
 
 void Pipeline::resetRegistration() {

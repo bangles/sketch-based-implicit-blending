@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <eigen3/unsupported/Eigen/CXX11/Tensor>
 #include <igl/floor.h>
+#include <igl/slice_mask.h>
 
 class Pipeline {
 private:
@@ -38,10 +39,11 @@ public:
   Template *m_template;
   UserPoints *userPoints;
 
-  void map(vector<Vector2f>& sampleVector);
+  void map(vector<Vector2f>& samples);
   void registerPoints();
   void generate(QOpenGLShaderProgram *program);
-  void automate(vector<Vector2f>& sampleVector, QOpenGLShaderProgram *program);
+  void automate(vector<Vector2f>& samples, QOpenGLShaderProgram *program);
+  MatrixXf preprocessSamples(MatrixXf& samples);
 
   MatrixXf calculateGradientAngles(MatrixXf (&g1)[2], MatrixXf (&g2)[2]);
   Tensor<float, 3> calculateGradientAngles(Tensor<float, 3> (&g1)[3], Tensor<float, 3> (&g2)[3]);

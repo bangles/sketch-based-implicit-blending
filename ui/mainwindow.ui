@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>700</height>
+    <width>700</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -163,7 +163,7 @@
   <customwidget>
    <class>GLWidget</class>
    <extends>QWidget</extends>
-   <header>GLWidget.h</header>
+   <header>GLWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
